@@ -13,11 +13,11 @@ export async function runDiff(options: DiffOptions): Promise<void> {
     return;
   }
   if (!config.gist_id) {
-    error('Gist가 연결되지 않았습니다.');
+    error(t('diff.no_gist'));
     return;
   }
 
-  info('원격 설정을 가져오는 중...');
+  info(t('diff.fetching'));
   const gist = await getGist(config.token, config.gist_id);
   const localFiles = scanFiles(options.only);
   const changes = compareForPull(gist, localFiles);
@@ -45,5 +45,5 @@ export async function runDiff(options: DiffOptions): Promise<void> {
     }
   }
 
-  console.log(`\n총 ${modified.length}개 파일에 차이가 있습니다.`);
+  console.log(`\n${t('diff.total').replace('{count}', String(modified.length))}`);
 }

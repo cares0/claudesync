@@ -30,7 +30,7 @@ export async function runPush(options: PushOptions): Promise<void> {
   for (const file of files) {
     const secrets = detectSecrets(file.content);
     if (secrets.length > 0) {
-      warn(`${file.relativePath}: ${secrets.length}개 의심 항목 발견`);
+      warn(t('push.secret_found').replace('{path}', file.relativePath).replace('{count}', String(secrets.length)));
       for (const s of secrets) {
         console.log(`  ${c.dim(`L${s.line}`)} ${c.yellow(s.pattern)}: ${s.match}`);
       }
@@ -58,7 +58,7 @@ export async function runPush(options: PushOptions): Promise<void> {
 
       const modified = changes.filter((c) => c.status !== 'unchanged');
       if (modified.length === 0) {
-        success('변경사항 없음. 로컬과 원격이 동일합니다.');
+        success(t('push.no_changes'));
         return;
       }
 
@@ -103,7 +103,7 @@ export async function runPush(options: PushOptions): Promise<void> {
     } catch (err) {
       // Gist not found — create new
       if (String(err).includes('404')) {
-        info('Gist를 찾을 수 없습니다. 새로 생성합니다.');
+        info(t('push.gist_not_found_creating'));
         const newGist = await createGist(config.token, finalFiles, encryptedFiles, options.message);
         config.gist_id = newGist.id;
         saveConfig(config);
@@ -114,7 +114,7 @@ export async function runPush(options: PushOptions): Promise<void> {
     }
   } else {
     // No Gist yet — create
-    heading(`${finalFiles.length}개 파일을 새 Gist에 업로드합니다:`);
+    heading(t('push.uploading_new').replace('{count}', String(finalFiles.length)));
     for (const f of finalFiles) {
       console.log(`  [${f.category}] ${f.relativePath}`);
     }

@@ -372,6 +372,106 @@ const messages = {
     ko: '선택 (1-{max}):',
     en: 'Choose (1-{max}):',
   },
+
+  // ── Init ─────────────────────────────────────
+  'init.no_token_input': {
+    ko: '토큰이 입력되지 않았습니다.',
+    en: 'No token entered.',
+  },
+  'init.gist_linked': {
+    ko: 'Gist {id}에 연결되었습니다.',
+    en: 'Linked to Gist {id}.',
+  },
+  'init.validating': {
+    ko: '토큰 검증 중...',
+    en: 'Validating token...',
+  },
+  'init.token_invalid': {
+    ko: '토큰이 유효하지 않습니다. gist 스코프가 있는지 확인하세요.',
+    en: 'Token is invalid. Make sure it has the gist scope.',
+  },
+  'init.searching_gist': {
+    ko: '기존 claudesync Gist 검색 중...',
+    en: 'Searching for existing claudesync Gist...',
+  },
+  'init.gist_found': {
+    ko: '기존 Gist를 찾았습니다: {id}',
+    en: 'Found existing Gist: {id}',
+  },
+  'init.no_gist': {
+    ko: '기존 Gist가 없습니다. `claudesync push`로 새로 생성하세요.',
+    en: 'No existing Gist found. Run `claudesync push` to create one.',
+  },
+
+  // ── Push (additional) ────────────────────────
+  'push.secret_found': {
+    ko: '{path}: {count}개 의심 항목 발견',
+    en: '{path}: {count} suspicious item(s) found',
+  },
+  'push.no_changes': {
+    ko: '변경사항 없음. 로컬과 원격이 동일합니다.',
+    en: 'No changes. Local and remote are identical.',
+  },
+  'push.gist_not_found_creating': {
+    ko: 'Gist를 찾을 수 없습니다. 새로 생성합니다.',
+    en: 'Gist not found. Creating a new one.',
+  },
+  'push.uploading_new': {
+    ko: '{count}개 파일을 새 Gist에 업로드합니다:',
+    en: 'Uploading {count} file(s) to new Gist:',
+  },
+
+  // ── Pull (additional) ────────────────────────
+  'pull.no_gist': {
+    ko: 'Gist가 연결되지 않았습니다. `claudesync push` 또는 `claudesync link <id>`를 먼저 실행하세요.',
+    en: 'No Gist linked. Run `claudesync push` or `claudesync link <id>` first.',
+  },
+  'pull.changes_heading': {
+    ko: '변경사항:',
+    en: 'Changes:',
+  },
+  'pull.icon_added': {
+    ko: '+ 추가',
+    en: '+ Add',
+  },
+  'pull.icon_modified': {
+    ko: '~ 수정',
+    en: '~ Mod',
+  },
+  'pull.icon_deleted': {
+    ko: '- 삭제',
+    en: '- Del',
+  },
+  'pull.diff_truncated': {
+    ko: '({count}줄 변경 — claudesync diff로 전체 확인)',
+    en: '({count} lines changed — run claudesync diff to see full diff)',
+  },
+  'pull.skip_deleted': {
+    ko: '스킵: {path} (원격에서 삭제됨, 로컬은 유지)',
+    en: 'Skipped: {path} (deleted on remote, kept locally)',
+  },
+  'pull.decrypt_failed': {
+    ko: '복호화 실패: {path}',
+    en: 'Decryption failed: {path}',
+  },
+  'pull.applied': {
+    ko: '{count}개 파일 적용',
+    en: '{count} file(s) applied',
+  },
+
+  // ── Diff (additional) ────────────────────────
+  'diff.no_gist': {
+    ko: 'Gist가 연결되지 않았습니다.',
+    en: 'No Gist linked.',
+  },
+  'diff.fetching': {
+    ko: '원격 설정을 가져오는 중...',
+    en: 'Fetching remote settings...',
+  },
+  'diff.total': {
+    ko: '총 {count}개 파일에 차이가 있습니다.',
+    en: '{count} file(s) have differences.',
+  },
 } as const;
 
 type MessageKey = keyof typeof messages;

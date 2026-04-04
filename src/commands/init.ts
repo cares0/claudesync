@@ -16,7 +16,7 @@ export async function runInit(options: InitOptions): Promise<void> {
     // Manual PAT input
     token = await askHidden(t('auth.enter_token'));
     if (!token.trim()) {
-      error('토큰이 입력되지 않았습니다.');
+      error(t('init.no_token_input'));
       return;
     }
     token = token.trim();
@@ -34,7 +34,7 @@ export async function runInit(options: InitOptions): Promise<void> {
       gist_id: options.linkGistId,
       machine_name: machineName(),
     });
-    success(`Gist ${options.linkGistId}에 연결되었습니다.`);
+    success(t('init.gist_linked').replace('{id}', options.linkGistId));
     return;
   } else {
     // OAuth Device Flow
@@ -48,15 +48,15 @@ export async function runInit(options: InitOptions): Promise<void> {
   }
 
   // Validate token
-  info('토큰 검증 중...');
+  info(t('init.validating'));
   const valid = await validateToken(token);
   if (!valid) {
-    error('토큰이 유효하지 않습니다. gist 스코프가 있는지 확인하세요.');
+    error(t('init.token_invalid'));
     return;
   }
 
   // Check for existing Gist
-  info('기존 claudesync Gist 검색 중...');
+  info(t('init.searching_gist'));
   const existingGist = await findGist(token);
 
   const config = {
@@ -69,8 +69,8 @@ export async function runInit(options: InitOptions): Promise<void> {
   success(t('auth.token_saved'));
 
   if (existingGist) {
-    success(`기존 Gist를 찾았습니다: ${existingGist.id}`);
+    success(t('init.gist_found').replace('{id}', existingGist.id));
   } else {
-    warn('기존 Gist가 없습니다. `claudesync push`로 새로 생성하세요.');
+    warn(t('init.no_gist'));
   }
 }
