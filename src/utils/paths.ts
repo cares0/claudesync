@@ -48,3 +48,23 @@ export function machineName(): string {
 export function platformString(): string {
   return `${process.platform}-${process.arch}`;
 }
+
+/** ~/.claudesync/auto.json */
+export function autoConfigPath(): string {
+  return join(configDir(), 'auto.json');
+}
+
+/** ~/.claudesync/auto.log */
+export function autoLogPath(): string {
+  return join(configDir(), 'auto.log');
+}
+
+/** ~/.claudesync/sync.lock */
+export function lockFilePath(): string {
+  return join(configDir(), 'sync.lock');
+}
+
+/** ~/.claudesync/notifications.json */
+export function pendingNotificationsPath(): string {
+  return join(configDir(), 'notifications.json');
+}
