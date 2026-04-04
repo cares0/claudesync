@@ -18,44 +18,43 @@ describe('postinstall banner', () => {
     expect(status).toBe(0);
   });
 
-  it('prints nothing to stdout', () => {
-    const { stdout } = runScript();
-    expect(stdout).toBe('');
+  it('prints nothing to stderr', () => {
+    const { stderr } = runScript();
+    expect(stderr).toBe('');
   });
 
-  it('prints banner to stderr', () => {
-    const { stderr } = runScript();
-    // Logo is rendered as figlet ASCII art, check for recognizable fragments
-    expect(stderr).toContain('___ _');
-    expect(stderr).toContain('S Y N C');
+  it('prints banner to stdout', () => {
+    const { stdout } = runScript();
+    expect(stdout).toContain('___ _');
+    expect(stdout).toContain('S Y N C');
   });
 
   it('contains all command sections', () => {
-    const { stderr } = runScript();
-    expect(stderr).toContain('Getting Started');
-    expect(stderr).toContain('Auto Sync');
-    expect(stderr).toContain('History & Rollback');
-    expect(stderr).toContain('Language');
+    const { stdout } = runScript();
+    expect(stdout).toContain('Getting Started');
+    expect(stdout).toContain('Auto Sync');
+    expect(stdout).toContain('History & Rollback');
+    expect(stdout).toContain('Language');
   });
 
   it('contains key commands', () => {
-    const { stderr } = runScript();
-    expect(stderr).toContain('claudesync init');
-    expect(stderr).toContain('claudesync push');
-    expect(stderr).toContain('claudesync pull');
-    expect(stderr).toContain('claudesync auto');
-    expect(stderr).toContain('claudesync history');
-    expect(stderr).toContain('claudesync --help');
+    const { stdout } = runScript();
+    expect(stdout).toContain('claudesync init');
+    expect(stdout).toContain('claudesync push');
+    expect(stdout).toContain('claudesync pull');
+    expect(stdout).toContain('claudesync auto');
+    expect(stdout).toContain('claudesync history');
+    expect(stdout).toContain('claudesync --help');
   });
 
   it('has no ANSI codes when NO_COLOR is set', () => {
-    const { stderr } = runScript({ NO_COLOR: '1' });
-    expect(stderr).not.toMatch(/\x1b\[/);
+    const { stdout } = runScript({ NO_COLOR: '1' });
+    expect(stdout).not.toMatch(/\x1b\[/);
   });
 
   it('has aligned box borders', () => {
-    const { stderr } = runScript();
-    const lines = stderr.trim().split('\n');
+    const { stdout } = runScript();
+    const lines = stdout.trim().split('\n');
     const boxLines = lines.filter((l) => l.includes('│'));
     const lengths = boxLines.map((l) => l.replace(/\x1b\[[0-9;]*m/g, '').length);
     const unique = new Set(lengths);

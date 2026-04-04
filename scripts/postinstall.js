@@ -4,7 +4,7 @@
 const noColor =
   process.env.NO_COLOR !== undefined ||
   process.env.CI !== undefined ||
-  !process.stderr.isTTY;
+  !process.stdout.isTTY;
 
 const esc = (code) => (noColor ? '' : `\x1b[${code}m`);
 const reset = noColor ? '' : '\x1b[0m';
@@ -98,4 +98,4 @@ const body = [
 
 // ── Print ───────────────────────────────────────────
 const banner = [...header, ...body].join('\n');
-process.stderr.write('\n' + banner + '\n\n');
+process.stdout.write('\n' + banner + '\n\n');

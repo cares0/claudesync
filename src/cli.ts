@@ -16,7 +16,8 @@ import { getPendingNotifications, clearPendingNotifications } from './core/notif
 import type { Category } from './types.js';
 import { CATEGORIES } from './types.js';
 
-const VERSION = '0.1.0';
+import { createRequire } from 'node:module';
+const { version: VERSION } = createRequire(import.meta.url)('../package.json');
 
 function parseArgs(argv: string[]) {
   const args = argv.slice(2);
