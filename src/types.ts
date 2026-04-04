@@ -113,3 +113,25 @@ export interface PullOptions {
 export interface DiffOptions {
   only?: Category;
 }
+
+// ── Auto Sync ──────────────────────────────────────────────
+export type AutoDirection = 'push' | 'pull';
+
+export type PullConflictPolicy = 'overwrite' | 'skip' | 'backup';
+
+export interface AutoConfig {
+  direction: AutoDirection;
+  interval_seconds: number;
+  categories: Category[];
+  encrypt: boolean;
+  enabled: boolean;
+  created_at: string;
+  conflict_policy?: PullConflictPolicy;
+}
+
+export interface PrimaryDevice {
+  machine: string;
+  hostname: string;
+  platform: string;
+  registered_at: string;
+}
