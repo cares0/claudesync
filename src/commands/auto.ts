@@ -1,8 +1,8 @@
 import { t } from '../utils/i18n.js';
-import { info, success, warn, error, heading, confirm, ask, select, c } from '../utils/terminal.js';
+import { success, warn, error, heading, confirm, ask, select, c } from '../utils/terminal.js';
 import { loadConfig } from '../core/auth.js';
 import { getGist, parseMeta } from '../core/gist.js';
-import { saveAutoConfig, loadAutoConfig } from '../core/auto-config.js';
+import { saveAutoConfig } from '../core/auto-config.js';
 import { registerScheduler, unregisterScheduler } from '../core/scheduler.js';
 import { machineName, platformString } from '../utils/paths.js';
 import { CATEGORIES } from '../types.js';
