@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.4.0](https://github.com/cares0/claudesync/compare/claude-settings-sync-v0.3.0...claude-settings-sync-v0.4.0) (2026-04-04)
+
+
+### Features
+
+* add postinstall banner script ([6f1c85b](https://github.com/cares0/claudesync/commit/6f1c85b595fd1aebd76a93ecca28689fe54b8998))
+* add postinstall script and include scripts/ in package files ([d268ac0](https://github.com/cares0/claudesync/commit/d268ac02551deabce60a27a442699d755b95a4df))
+
+
+### Bug Fixes
+
+* strip ANSI codes from right argument in pad() for correct alignment ([13534a6](https://github.com/cares0/claudesync/commit/13534a67e723fd12427ea0b3894adc4249c55080))
+
+
+### Documentation
+
+* update npm package name in README badges and install commands ([caa2ba7](https://github.com/cares0/claudesync/commit/caa2ba7274252bbe87e367883cc7d58676a23345))
+
 ## [0.3.0](https://github.com/cares0/claudesync/compare/claude-settings-sync-v0.2.0...claude-settings-sync-v0.3.0) (2026-04-04)
 
 
