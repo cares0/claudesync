@@ -1,4 +1,4 @@
-import { setLang, detectLang, t } from './utils/i18n.js';
+import { setLang, detectLang, t, loadLangConfig } from './utils/i18n.js';
 import { error, info, warn } from './utils/terminal.js';
 
 import { runInit } from './commands/init.js';
@@ -93,12 +93,13 @@ function parseCategory(value: string | boolean | undefined): Category | undefine
 async function main() {
   const { command, flags, positional } = parseArgs(process.argv);
 
-  // Language
+  // Language: --lang flag > config.json > env detection > en default
   const langFlag = flags['lang'];
   if (langFlag === 'ko' || langFlag === 'en') {
     setLang(langFlag);
   } else {
-    setLang(detectLang());
+    const saved = loadLangConfig();
+    setLang(saved ?? detectLang());
   }
 
   // Version
@@ -188,6 +189,11 @@ async function main() {
           await runAuto();
         }
         break;
+      case 'config': {
+        const { runConfig } = await import('./commands/config.js');
+        runConfig(positional);
+        break;
+      }
       case 'auto-run':
         await runAutoRun();
         break;

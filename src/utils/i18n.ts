@@ -1,3 +1,6 @@
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { userConfigPath } from './paths.js';
+
 type Lang = 'ko' | 'en';
 
 const messages = {
@@ -225,6 +228,24 @@ const messages = {
     ko: '동기화가 진행 중입니다. 잠시 후 다시 시도하세요.',
     en: 'Sync in progress. Try again later.',
   },
+
+  // ── Config ───────────────────────────────────
+  'config.not_set': {
+    ko: '(설정 안됨)',
+    en: '(not set)',
+  },
+  'config.invalid_lang': {
+    ko: '지원하는 언어: ko, en',
+    en: 'Supported languages: ko, en',
+  },
+  'config.lang_saved': {
+    ko: '언어 설정이 저장되었습니다.',
+    en: 'Language setting saved.',
+  },
+  'config.unknown_key': {
+    ko: '알 수 없는 설정 키입니다. 사용 가능: lang',
+    en: 'Unknown config key. Available: lang',
+  },
 } as const;
 
 type MessageKey = keyof typeof messages;
@@ -247,4 +268,32 @@ export function detectLang(): Lang {
   const env = process.env.LANG || process.env.LANGUAGE || process.env.LC_ALL || '';
   if (env.startsWith('ko')) return 'ko';
   return 'en';
+}
+
+/** Load lang from ~/.claudesync/config.json */
+export function loadLangConfig(): Lang | null {
+  const path = userConfigPath();
+  if (!existsSync(path)) return null;
+  try {
+    const data = JSON.parse(readFileSync(path, 'utf-8'));
+    if (data.lang === 'ko' || data.lang === 'en') return data.lang;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/** Save lang to ~/.claudesync/config.json */
+export function saveLangConfig(lang: Lang): void {
+  const path = userConfigPath();
+  let data: Record<string, unknown> = {};
+  if (existsSync(path)) {
+    try {
+      data = JSON.parse(readFileSync(path, 'utf-8'));
+    } catch {
+      data = {};
+    }
+  }
+  data.lang = lang;
+  writeFileSync(path, JSON.stringify(data, null, 2), 'utf-8');
 }
