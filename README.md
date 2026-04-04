@@ -2,7 +2,7 @@
 
 Sync your [Claude Code](https://docs.anthropic.com/en/docs/claude-code) settings across machines via GitHub Gist.
 
-[![npm version](https://img.shields.io/npm/v/claudesync)](https://www.npmjs.com/package/claudesync)
+[![npm version](https://img.shields.io/npm/v/claude-settings-sync)](https://www.npmjs.com/package/claude-settings-sync)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)](https://nodejs.org)
 
@@ -26,7 +26,7 @@ Claude Code stores settings in `~/.claude/` — instructions, hooks, skills, key
 ## Install
 
 ```bash
-npm install -g claudesync
+npm install -g claude-settings-sync
 ```
 
 <details>
