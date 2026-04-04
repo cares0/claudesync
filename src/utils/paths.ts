@@ -86,3 +86,8 @@ export function lockFilePath(): string {
 export function pendingNotificationsPath(): string {
   return join(configDir(), 'notifications.json');
 }
+
+/** ~/.claudesync/config.json */
+export function userConfigPath(): string {
+  return join(configDir(), 'config.json');
+}

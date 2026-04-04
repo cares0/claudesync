@@ -17,7 +17,7 @@ export async function runPull(options: PullOptions): Promise<void> {
     return;
   }
   if (!config.gist_id) {
-    error('Gist가 연결되지 않았습니다. `claudesync push` 또는 `claudesync link <id>`를 먼저 실행하세요.');
+    error(t('pull.no_gist'));
     return;
   }
 
@@ -45,12 +45,12 @@ export async function runPull(options: PullOptions): Promise<void> {
 }
 
 async function applyChanges(changes: FileChange[], token: string, force: boolean, meta: SyncMeta | null): Promise<void> {
-  heading('변경사항:');
+  heading(t('pull.changes_heading'));
   for (const change of changes) {
     const icon =
-      change.status === 'added' ? c.green('+ 추가') :
-      change.status === 'modified' ? c.yellow('~ 수정') :
-      c.red('- 삭제');
+      change.status === 'added' ? c.green(t('pull.icon_added')) :
+      change.status === 'modified' ? c.yellow(t('pull.icon_modified')) :
+      c.red(t('pull.icon_deleted'));
     console.log(`  ${icon} [${change.category}] ${change.relativePath}`);
 
     if (change.status === 'modified' && change.localContent && change.remoteContent) {
@@ -58,7 +58,7 @@ async function applyChanges(changes: FileChange[], token: string, force: boolean
       if (diff.length > 0 && diff.length <= 30) {
         printDiff(change.relativePath, diff);
       } else if (diff.length > 30) {
-        console.log(c.dim(`    (${diff.length}줄 변경 — claudesync diff로 전체 확인)`));
+        console.log(c.dim(`    (${t('pull.diff_truncated').replace('{count}', String(diff.length))})`));
       }
     }
   }
@@ -86,7 +86,7 @@ async function applyChanges(changes: FileChange[], token: string, force: boolean
 
     if (change.status === 'deleted') {
       // Don't delete local files during pull — just skip
-      warn(`스킵: ${change.relativePath} (원격에서 삭제됨, 로컬은 유지)`);
+      warn(t('pull.skip_deleted').replace('{path}', change.relativePath));
       continue;
     }
 
@@ -99,7 +99,7 @@ async function applyChanges(changes: FileChange[], token: string, force: boolean
       try {
         content = decrypt(content, token);
       } catch {
-        error(`복호화 실패: ${change.relativePath}`);
+        error(t('pull.decrypt_failed').replace('{path}', change.relativePath));
         continue;
       }
     }
@@ -119,5 +119,5 @@ async function applyChanges(changes: FileChange[], token: string, force: boolean
     applied++;
   }
 
-  success(`${t('pull.success')} (${applied}개 파일 적용)`);
+  success(`${t('pull.success')} (${t('pull.applied').replace('{count}', String(applied))})`);
 }

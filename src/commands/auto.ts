@@ -39,7 +39,7 @@ export async function runAuto(): Promise<void> {
     return;
   }
   if (!config.gist_id) {
-    error('Gist가 연결되지 않았습니다. `claudesync push` 또는 `claudesync link <id>`를 먼저 실행하세요.');
+    error(t('auto.no_gist'));
     return;
   }
 
@@ -70,7 +70,7 @@ export async function runAuto(): Promise<void> {
           );
           const ok = await confirm(t('auto.confirm_primary_change'), false);
           if (!ok) {
-            warn('설정이 취소되었습니다.');
+            warn(t('auto.setup_cancelled'));
             return;
           }
         }
@@ -125,7 +125,7 @@ export async function runAuto(): Promise<void> {
     : [...allCats];
 
   if (catInput.trim() && selectedCategories.length === 0) {
-    warn('유효한 카테고리가 없습니다. 전체 카테고리로 설정합니다.');
+    warn(t('auto.invalid_categories'));
     selectedCategories = [...allCats];
   }
 
@@ -149,7 +149,7 @@ export async function runAuto(): Promise<void> {
     unregisterScheduler(); // Clean up any existing
     registerScheduler(intervalSeconds);
   } catch (err) {
-    error(`스케줄러 등록 실패: ${err instanceof Error ? err.message : String(err)}`);
+    error(t('auto.scheduler_failed').replace('{error}', err instanceof Error ? err.message : String(err)));
     return;
   }
 
@@ -161,18 +161,18 @@ export async function runAuto(): Promise<void> {
       const { updateGist: updateGistFn } = await import('../core/gist.js');
       await updateGistFn(config.token, config.gist_id, files, undefined, undefined, 'auto-sync: primary device registered', primaryDevice);
     } catch {
-      warn('Primary 디바이스 정보를 Gist에 등록하지 못했습니다. 다음 auto push 시 등록됩니다.');
+      warn(t('auto.primary_register_failed'));
     }
   }
 
   // 10. Summary
   console.log();
   success(t('auto.enabled'));
-  console.log(`  ${c.bold('Direction:')} ${direction}`);
-  console.log(`  ${c.bold('Interval:')}  ${formatInterval(intervalSeconds)}`);
-  console.log(`  ${c.bold('Categories:')} ${selectedCategories.join(', ')}`);
-  console.log(`  ${c.bold('Encrypt:')}  ${encrypt ? 'Yes' : 'No'}`);
+  console.log(`  ${c.bold(t('auto.summary_direction') + ':')} ${direction}`);
+  console.log(`  ${c.bold(t('auto.summary_interval') + ':')}  ${formatInterval(intervalSeconds)}`);
+  console.log(`  ${c.bold(t('auto.summary_categories') + ':')} ${selectedCategories.join(', ')}`);
+  console.log(`  ${c.bold(t('auto.summary_encrypt') + ':')}  ${encrypt ? t('auto.yes') : t('auto.no')}`);
   if (conflictPolicy) {
-    console.log(`  ${c.bold('Conflict:')}  ${conflictPolicy}`);
+    console.log(`  ${c.bold(t('auto.summary_conflict') + ':')}  ${conflictPolicy}`);
   }
 }

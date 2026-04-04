@@ -1,3 +1,4 @@
+import { t } from '../utils/i18n.js';
 import { loadConfig } from '../core/auth.js';
 import { loadAutoConfig } from '../core/auto-config.js';
 import { acquireLock, releaseLock } from '../core/lock.js';
@@ -41,8 +42,9 @@ export async function runAutoRun(): Promise<void> {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     appendLog(autoConfig.direction, 'error', message);
-    sendOsNotification('claudesync', `Auto ${autoConfig.direction} failed: ${message}`);
-    addPendingNotification('error', `Auto ${autoConfig.direction} failed: ${message}`);
+    const failMsg = t('auto_run.failed').replace('{direction}', autoConfig.direction).replace('{message}', message);
+    sendOsNotification('claudesync', failMsg);
+    addPendingNotification('error', failMsg);
   } finally {
     releaseLock();
   }
@@ -120,7 +122,7 @@ async function autoRunPush(
     };
 
     await updateGist(token, gistId, filesToUpload, deletedFiles, encryptedFiles, 'auto-sync push', primaryDevice);
-    appendLog('push', 'success', `${modified.length} files synced`);
+    appendLog('push', 'success', t('auto_run.push_synced').replace('{count}', String(modified.length)));
   } catch (err) {
     if (String(err).includes('404')) {
       const primaryDevice: PrimaryDevice = {
@@ -208,6 +210,8 @@ async function autoRunPull(
     applied++;
   }
 
-  const message = `${applied} files applied` + (skipped > 0 ? `, ${skipped} skipped` : '');
+  const message = skipped > 0
+    ? t('auto_run.pull_applied_skipped').replace('{applied}', String(applied)).replace('{skipped}', String(skipped))
+    : t('auto_run.pull_applied').replace('{applied}', String(applied));
   appendLog('pull', 'success', message);
 }

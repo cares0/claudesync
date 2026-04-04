@@ -1,4 +1,4 @@
-import { setLang, detectLang, t } from './utils/i18n.js';
+import { setLang, detectLang, t, loadLangConfig } from './utils/i18n.js';
 import { error, info, warn } from './utils/terminal.js';
 
 import { runInit } from './commands/init.js';
@@ -55,31 +55,32 @@ function printHelp(): void {
 ${t('app.name')} v${VERSION}
 ${t('app.description')}
 
-Usage: claudesync <command> [options]
+${t('help.usage')}
 
-Commands:
-  init                 인증 설정 (OAuth Device Flow)
-  init --token         PAT 수동 입력
-  link <gist-id>       기존 Gist 연결
-  push                 로컬 → Gist 업로드
-  pull                 Gist → 로컬 복원
-  diff                 로컬 vs 원격 비교
-  status               인증/동기화 상태 확인
-  list                 동기화 대상 로컬 파일 목록
-  history              Gist revision 히스토리
-  rollback <version>   특정 버전으로 복원
-  auto                 자동 동기화 설정 (인터랙티브)
-  auto disable         자동 동기화 해제
-  auto status          자동 동기화 상태 확인
+${t('help.commands')}
+  init                 ${t('help.init')}
+  init --token         ${t('help.init_token')}
+  link <gist-id>       ${t('help.link')}
+  push                 ${t('help.push')}
+  pull                 ${t('help.pull')}
+  diff                 ${t('help.diff')}
+  status               ${t('help.status')}
+  list                 ${t('help.list')}
+  history              ${t('help.history')}
+  rollback <version>   ${t('help.rollback')}
+  auto                 ${t('help.auto')}
+  auto disable         ${t('help.auto_disable')}
+  auto status          ${t('help.auto_status')}
+  config <key> <value> ${t('help.config')}
 
-Options:
-  -m, --message <msg>  push 시 메시지 기록 (history에서 표시)
-  --only <category>    카테고리 필터 (settings|instructions|hooks|skills|plugins|teams|ui)
-  --force              확인 없이 실행
-  --encrypt            암호화 활성화
-  --lang=ko|en         언어 설정
-  -h, --help           도움말
-  -v, --version        버전 정보
+${t('help.options')}
+  -m, --message <msg>  ${t('help.opt_message')}
+  --only <category>    ${t('help.opt_only')}
+  --force              ${t('help.opt_force')}
+  --encrypt            ${t('help.opt_encrypt')}
+  --lang=ko|en         ${t('help.opt_lang')}
+  -h, --help           ${t('help.opt_help')}
+  -v, --version        ${t('help.opt_version')}
 `);
 }
 
@@ -93,12 +94,13 @@ function parseCategory(value: string | boolean | undefined): Category | undefine
 async function main() {
   const { command, flags, positional } = parseArgs(process.argv);
 
-  // Language
+  // Language: --lang flag > config.json > env detection > en default
   const langFlag = flags['lang'];
   if (langFlag === 'ko' || langFlag === 'en') {
     setLang(langFlag);
   } else {
-    setLang(detectLang());
+    const saved = loadLangConfig();
+    setLang(saved ?? detectLang());
   }
 
   // Version
@@ -139,7 +141,7 @@ async function main() {
         break;
       case 'link':
         if (!positional[0]) {
-          error('Usage: claudesync link <gist-id>');
+          error(t('cli.link_usage'));
           process.exit(1);
         }
         await runInit({ linkGistId: positional[0] });
@@ -160,12 +162,12 @@ async function main() {
         const { scanFiles } = await import('./core/scanner.js');
         const files = scanFiles(only);
         if (files.length === 0) {
-          console.log('동기화 대상 파일 없음');
+          console.log(t('cli.list_empty'));
         } else {
           for (const f of files) {
             console.log(`  [${f.category}] ${f.relativePath}`);
           }
-          console.log(`\n총 ${files.length}개 파일`);
+          console.log(`\n${t('cli.list_total').replace('{count}', String(files.length))}`);
         }
         break;
       }
@@ -174,7 +176,7 @@ async function main() {
         break;
       case 'rollback':
         if (!positional[0]) {
-          error('Usage: claudesync rollback <version>');
+          error(t('cli.rollback_usage'));
           process.exit(1);
         }
         await runRollback(positional[0]);
@@ -188,11 +190,16 @@ async function main() {
           await runAuto();
         }
         break;
+      case 'config': {
+        const { runConfig } = await import('./commands/config.js');
+        runConfig(positional);
+        break;
+      }
       case 'auto-run':
         await runAutoRun();
         break;
       default:
-        error(`알 수 없는 명령어: ${command}`);
+        error(t('cli.unknown_command').replace('{command}', command));
         printHelp();
         process.exit(1);
     }

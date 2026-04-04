@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync, chmodSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { authFilePath } from '../utils/paths.js';
 import type { AuthConfig } from '../types.js';
+import { t } from '../utils/i18n.js';
 
 const KEYCHAIN_SERVICE = 'claudesync';
 const KEYCHAIN_ACCOUNT = 'github-token';
@@ -104,11 +105,11 @@ export function saveToken(token: string): void {
 export function loadToken(): string | null {
   // Try keychain/secret-tool first
   if (process.platform === 'darwin') {
-    const t = keychainGet();
-    if (t) return t;
+    const token = keychainGet();
+    if (token) return token;
   } else if (process.platform === 'linux') {
-    const t = secretToolGet();
-    if (t) return t;
+    const token = secretToolGet();
+    if (token) return token;
   }
   // Fallback to file
   const config = fileGet();
@@ -171,8 +172,8 @@ export async function deviceFlow(): Promise<string> {
     expires_in: number;
   };
 
-  console.log(`\n  URL: ${codeData.verification_uri}`);
-  console.log(`  Code: ${codeData.user_code}\n`);
+  console.log(`\n${t('auth.device_url').replace('{url}', codeData.verification_uri)}`);
+  console.log(`${t('auth.device_code').replace('{code}', codeData.user_code)}\n`);
 
   // Step 2: Poll for token
   const interval = (codeData.interval || 5) * 1000;
@@ -204,8 +205,8 @@ export async function deviceFlow(): Promise<string> {
       await new Promise((r) => setTimeout(r, 5000));
       continue;
     }
-    throw new Error(`OAuth error: ${tokenData.error}`);
+    throw new Error(t('auth.oauth_error').replace('{error}', String(tokenData.error)));
   }
 
-  throw new Error('Device flow timed out');
+  throw new Error(t('auth.device_flow_timeout'));
 }

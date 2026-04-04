@@ -18,7 +18,7 @@ export async function runRollback(version: string): Promise<void> {
     return;
   }
   if (!config.gist_id) {
-    error('Gist가 연결되지 않았습니다.');
+    error(t('rollback.no_gist'));
     return;
   }
 
@@ -26,12 +26,12 @@ export async function runRollback(version: string): Promise<void> {
   const revisions = await getHistory(config.token, config.gist_id);
   const matched = revisions.find((r) => r.version.startsWith(version));
   if (!matched) {
-    error(`리비전 '${version}'을 찾을 수 없습니다. \`claudesync history\`로 확인하세요.`);
+    error(t('rollback.not_found').replace('{version}', version));
     return;
   }
 
   const fullSha = matched.version;
-  info(`리비전 ${fullSha.slice(0, 8)} (${new Date(matched.committed_at).toLocaleString()})을 복원합니다.`);
+  info(t('rollback.restoring').replace('{sha}', fullSha.slice(0, 8)).replace('{date}', new Date(matched.committed_at).toLocaleString()));
 
   // Fetch Gist at that revision
   const gist = await getGistAtRevision(config.token, config.gist_id, fullSha);
@@ -43,7 +43,7 @@ export async function runRollback(version: string): Promise<void> {
   // Show diff
   const filesToApply: Array<{ relativePath: string; content: string }> = [];
 
-  heading('복원 대상:');
+  heading(t('rollback.target_heading'));
   for (const [gistName, gistFile] of Object.entries(gist.files)) {
     if (gistName === META_FILE || !gistFile?.content) continue;
 
@@ -52,7 +52,7 @@ export async function runRollback(version: string): Promise<void> {
     const local = localMap.get(gistName);
 
     if (!local) {
-      console.log(`  ${c.green('+')} ${relativePath} (새 파일)`);
+      console.log(`  ${c.green('+')} ${relativePath} ${t('rollback.new_file')}`);
     } else if (local.content !== gistFile.content) {
       console.log(`  ${c.yellow('~')} ${relativePath}`);
       const diff = simpleDiff(local.content, gistFile.content);
@@ -69,7 +69,7 @@ export async function runRollback(version: string): Promise<void> {
       try {
         content = decrypt(content, config.token);
       } catch {
-        error(`복호화 실패: ${relativePath}`);
+        error(t('rollback.decrypt_failed').replace('{path}', relativePath));
         continue;
       }
     }
@@ -77,15 +77,15 @@ export async function runRollback(version: string): Promise<void> {
   }
 
   if (filesToApply.length === 0) {
-    success('현재 상태와 동일합니다.');
+    success(t('rollback.no_changes'));
     return;
   }
 
-  console.log(`\n${filesToApply.length}개 파일이 변경됩니다.`);
+  console.log(`\n${t('rollback.files_changed').replace('{count}', String(filesToApply.length))}`);
 
-  const ok = await confirm('복원하시겠습니까?');
+  const ok = await confirm(t('rollback.confirm'));
   if (!ok) {
-    warn('복원이 취소되었습니다.');
+    warn(t('rollback.cancelled'));
     return;
   }
 
@@ -107,5 +107,5 @@ export async function runRollback(version: string): Promise<void> {
     writeFileSync(targetPath, content, 'utf-8');
   }
 
-  success(`리비전 ${fullSha.slice(0, 8)}로 복원 완료!`);
+  success(t('rollback.success').replace('{sha}', fullSha.slice(0, 8)));
 }
