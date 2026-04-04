@@ -20,8 +20,9 @@ const c = {
 const W = 50;
 
 function pad(left, content, right) {
-  const visible = content.replace(/\x1b\[[0-9;]*m/g, '');
-  const totalText = left + visible + right;
+  const visibleContent = content.replace(/\x1b\[[0-9;]*m/g, '');
+  const visibleRight = right.replace(/\x1b\[[0-9;]*m/g, '');
+  const totalText = left + visibleContent + visibleRight;
   const gap = W - totalText.length;
   return left + content + right + ' '.repeat(Math.max(0, gap));
 }
