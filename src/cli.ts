@@ -36,8 +36,13 @@ function parseArgs(argv: string[]) {
       } else {
         flags[arg.slice(2)] = true;
       }
-    } else if (arg.startsWith('-')) {
-      flags[arg.slice(1)] = true;
+    } else if (arg.startsWith('-') && arg.length === 2) {
+      if (i + 1 < args.length && !args[i + 1].startsWith('-')) {
+        flags[arg.slice(1)] = args[i + 1];
+        i++;
+      } else {
+        flags[arg.slice(1)] = true;
+      }
     } else {
       if (!command) {
         command = arg;
