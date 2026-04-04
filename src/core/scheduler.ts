@@ -8,7 +8,11 @@ const SYSTEMD_SERVICE = 'claudesync-auto';
 
 // ── Template generators (pure, testable) ────────────────────
 
-export function buildLaunchdPlist(cliPath: string, intervalSeconds: number): string {
+export function buildLaunchdPlist(cliArgs: string[], intervalSeconds: number): string {
+  const argsXml = [...cliArgs, 'auto-run']
+    .map((arg) => `    <string>${arg}</string>`)
+    .join('\n');
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -17,8 +21,7 @@ export function buildLaunchdPlist(cliPath: string, intervalSeconds: number): str
   <string>${LAUNCHD_LABEL}</string>
   <key>ProgramArguments</key>
   <array>
-    <string>${cliPath}</string>
-    <string>auto-run</string>
+${argsXml}
   </array>
   <key>StartInterval</key>
   <integer>${intervalSeconds}</integer>
@@ -32,7 +35,8 @@ export function buildLaunchdPlist(cliPath: string, intervalSeconds: number): str
 </plist>`;
 }
 
-export function buildSystemdService(cliPath: string): string {
+export function buildSystemdService(cliArgs: string[]): string {
+  const execStart = [...cliArgs, 'auto-run'].join(' ');
   return `[Unit]
 Description=claudesync auto sync
 After=network-online.target
@@ -40,7 +44,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=${cliPath} auto-run
+ExecStart=${execStart}
 Environment=PATH=/usr/local/bin:/usr/bin:/bin
 
 [Install]
@@ -60,7 +64,9 @@ Persistent=true
 WantedBy=timers.target`;
 }
 
-export function buildSchtasksXml(cliPath: string, intervalSeconds: number): string {
+export function buildSchtasksXml(cliArgs: string[], intervalSeconds: number): string {
+  const command = cliArgs[0];
+  const args = [...cliArgs.slice(1), 'auto-run'].join(' ');
   const minutes = Math.max(1, Math.round(intervalSeconds / 60));
   return `<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
@@ -79,8 +85,8 @@ export function buildSchtasksXml(cliPath: string, intervalSeconds: number): stri
   </Triggers>
   <Actions>
     <Exec>
-      <Command>${cliPath}</Command>
-      <Arguments>auto-run</Arguments>
+      <Command>${command}</Command>
+      <Arguments>${args}</Arguments>
     </Exec>
   </Actions>
   <Settings>
@@ -93,27 +99,33 @@ export function buildSchtasksXml(cliPath: string, intervalSeconds: number): stri
 
 // ── Resolve CLI path ────────────────────────────────────────
 
-function resolveCliPath(): string {
+function resolveCliArgs(): string[] {
+  // 1. Try global install → single binary
   try {
-    return execSync('which claudesync', { encoding: 'utf-8' }).trim();
-  } catch {
-    // Fallback: assume global npm bin
-    const npmBin = execSync('npm bin -g', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
-    return join(npmBin, 'claudesync');
+    const bin = execSync('which claudesync', { encoding: 'utf-8' }).trim();
+    return [bin];
+  } catch { /* not globally installed */ }
+
+  // 2. Fallback: node + script path (e.g. nvm, local dev)
+  const scriptPath = process.argv[1];
+  if (scriptPath) {
+    return [process.execPath, scriptPath];
   }
+
+  throw new Error('claudesync CLI 경로를 찾을 수 없습니다. 글로벌 설치를 권장합니다: npm install -g claudesync');
 }
 
 // ── Register / Unregister ───────────────────────────────────
 
 export function registerScheduler(intervalSeconds: number): void {
-  const cliPath = resolveCliPath();
+  const cliArgs = resolveCliArgs();
 
   if (process.platform === 'darwin') {
-    registerLaunchd(cliPath, intervalSeconds);
+    registerLaunchd(cliArgs, intervalSeconds);
   } else if (process.platform === 'linux') {
-    registerSystemd(cliPath, intervalSeconds);
+    registerSystemd(cliArgs, intervalSeconds);
   } else if (process.platform === 'win32') {
-    registerSchtasks(cliPath, intervalSeconds);
+    registerSchtasks(cliArgs, intervalSeconds);
   } else {
     throw new Error(`Unsupported platform: ${process.platform}`);
   }
@@ -135,7 +147,7 @@ function launchdPlistPath(): string {
   return join(homedir(), 'Library', 'LaunchAgents', `${LAUNCHD_LABEL}.plist`);
 }
 
-function registerLaunchd(cliPath: string, intervalSeconds: number): void {
+function registerLaunchd(cliArgs: string[], intervalSeconds: number): void {
   const plistDir = join(homedir(), 'Library', 'LaunchAgents');
   if (!existsSync(plistDir)) mkdirSync(plistDir, { recursive: true });
 
@@ -146,7 +158,7 @@ function registerLaunchd(cliPath: string, intervalSeconds: number): void {
     execSync(`launchctl unload "${plistPath}"`, { stdio: 'ignore' });
   } catch { /* not loaded */ }
 
-  writeFileSync(plistPath, buildLaunchdPlist(cliPath, intervalSeconds), 'utf-8');
+  writeFileSync(plistPath, buildLaunchdPlist(cliArgs, intervalSeconds), 'utf-8');
   execSync(`launchctl load "${plistPath}"`, { stdio: 'ignore' });
 }
 
@@ -166,11 +178,11 @@ function systemdDir(): string {
   return join(homedir(), '.config', 'systemd', 'user');
 }
 
-function registerSystemd(cliPath: string, intervalSeconds: number): void {
+function registerSystemd(cliArgs: string[], intervalSeconds: number): void {
   const dir = systemdDir();
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
-  writeFileSync(join(dir, `${SYSTEMD_SERVICE}.service`), buildSystemdService(cliPath), 'utf-8');
+  writeFileSync(join(dir, `${SYSTEMD_SERVICE}.service`), buildSystemdService(cliArgs), 'utf-8');
   writeFileSync(join(dir, `${SYSTEMD_SERVICE}.timer`), buildSystemdTimer(intervalSeconds), 'utf-8');
 
   execSync('systemctl --user daemon-reload', { stdio: 'ignore' });
@@ -195,9 +207,9 @@ function unregisterSystemd(): void {
 
 // ── Windows Task Scheduler ──────────────────────────────────
 
-function registerSchtasks(cliPath: string, intervalSeconds: number): void {
+function registerSchtasks(cliArgs: string[], intervalSeconds: number): void {
   const xmlPath = join(homedir(), '.claudesync', 'schtask.xml');
-  writeFileSync(xmlPath, buildSchtasksXml(cliPath, intervalSeconds), 'utf-16le');
+  writeFileSync(xmlPath, buildSchtasksXml(cliArgs, intervalSeconds), 'utf-16le');
   execSync(`schtasks /Create /TN "claudesync-auto" /XML "${xmlPath}" /F`, { stdio: 'ignore' });
   unlinkSync(xmlPath);
 }

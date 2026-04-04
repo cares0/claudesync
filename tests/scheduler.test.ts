@@ -2,22 +2,29 @@ import { describe, it, expect } from 'vitest';
 import { buildLaunchdPlist, buildSystemdService, buildSystemdTimer, buildSchtasksXml } from '../src/core/scheduler.js';
 
 describe('scheduler file generation', () => {
-  const cliPath = '/usr/local/bin/claudesync';
+  const cliArgs = ['/usr/local/bin/claudesync'];
+  const cliArgsWithNode = ['/usr/bin/node', '/path/to/dist/cli.js'];
   const intervalSeconds = 300;
 
-  it('buildLaunchdPlist generates valid plist', () => {
-    const plist = buildLaunchdPlist(cliPath, intervalSeconds);
+  it('buildLaunchdPlist generates valid plist with single binary', () => {
+    const plist = buildLaunchdPlist(cliArgs, intervalSeconds);
     expect(plist).toContain('com.claudesync.auto');
     expect(plist).toContain('<integer>300</integer>');
-    expect(plist).toContain(cliPath);
-    expect(plist).toContain('auto-run');
+    expect(plist).toContain('<string>/usr/local/bin/claudesync</string>');
+    expect(plist).toContain('<string>auto-run</string>');
+  });
+
+  it('buildLaunchdPlist generates separate args for node + script', () => {
+    const plist = buildLaunchdPlist(cliArgsWithNode, intervalSeconds);
+    expect(plist).toContain('<string>/usr/bin/node</string>');
+    expect(plist).toContain('<string>/path/to/dist/cli.js</string>');
+    expect(plist).toContain('<string>auto-run</string>');
   });
 
   it('buildSystemdService generates valid unit', () => {
-    const unit = buildSystemdService(cliPath);
+    const unit = buildSystemdService(cliArgsWithNode);
     expect(unit).toContain('[Service]');
-    expect(unit).toContain(cliPath);
-    expect(unit).toContain('auto-run');
+    expect(unit).toContain('ExecStart=/usr/bin/node /path/to/dist/cli.js auto-run');
   });
 
   it('buildSystemdTimer generates valid timer', () => {
@@ -27,9 +34,9 @@ describe('scheduler file generation', () => {
   });
 
   it('buildSchtasksXml generates valid XML', () => {
-    const xml = buildSchtasksXml(cliPath, intervalSeconds);
+    const xml = buildSchtasksXml(cliArgsWithNode, intervalSeconds);
     expect(xml).toContain('claudesync-auto');
-    expect(xml).toContain(cliPath);
-    expect(xml).toContain('auto-run');
+    expect(xml).toContain('<Command>/usr/bin/node</Command>');
+    expect(xml).toContain('<Arguments>/path/to/dist/cli.js auto-run</Arguments>');
   });
 });
