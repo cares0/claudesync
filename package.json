@@ -1,0 +1,32 @@
+{
+  "name": "claudesync",
+  "version": "0.1.0",
+  "description": "Sync Claude Code settings across machines via GitHub Gist",
+  "type": "module",
+  "bin": {
+    "claudesync": "./bin/claudesync.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "keywords": ["claude", "claude-code", "sync", "settings", "gist"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cares0/claudesync.git"
+  },
+  "homepage": "https://github.com/cares0/claudesync",
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^3.0.0",
+    "@types/node": "^20.0.0"
+  }
+}
