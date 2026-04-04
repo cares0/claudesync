@@ -45,7 +45,7 @@ export async function runAutoStatus(): Promise<void> {
         console.log();
         console.log(`  ${c.bold(t('auto.primary_device_label') + ':')}`);
         console.log(`    ${t('status.machine')}:  ${pd.machine} ${isMe ? c.green(t('auto.this_machine')) : ''}`);
-        console.log(`    Hostname: ${pd.hostname}`);
+        console.log(`    ${t('status.host')}: ${pd.hostname}`);
         console.log(`    ${t('status.platform')}: ${pd.platform}`);
         console.log(`    ${t('auto.since_label')}:    ${pd.registered_at}`);
       }

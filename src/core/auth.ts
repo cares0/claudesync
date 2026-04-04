@@ -105,11 +105,11 @@ export function saveToken(token: string): void {
 export function loadToken(): string | null {
   // Try keychain/secret-tool first
   if (process.platform === 'darwin') {
-    const t = keychainGet();
-    if (t) return t;
+    const token = keychainGet();
+    if (token) return token;
   } else if (process.platform === 'linux') {
-    const t = secretToolGet();
-    if (t) return t;
+    const token = secretToolGet();
+    if (token) return token;
   }
   // Fallback to file
   const config = fileGet();
@@ -205,8 +205,8 @@ export async function deviceFlow(): Promise<string> {
       await new Promise((r) => setTimeout(r, 5000));
       continue;
     }
-    throw new Error(`OAuth error: ${tokenData.error}`);
+    throw new Error(t('auth.oauth_error').replace('{error}', String(tokenData.error)));
   }
 
-  throw new Error('Device flow timed out');
+  throw new Error(t('auth.device_flow_timeout'));
 }

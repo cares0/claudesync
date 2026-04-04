@@ -704,6 +704,36 @@ const messages = {
     ko: '  코드: {code}',
     en: '  Code: {code}',
   },
+  'auth.oauth_error': {
+    ko: 'OAuth 오류: {error}',
+    en: 'OAuth error: {error}',
+  },
+  'auth.device_flow_timeout': {
+    ko: 'Device flow 시간 초과',
+    en: 'Device flow timed out',
+  },
+  'error.unsupported_platform': {
+    ko: '지원하지 않는 플랫폼: {platform}',
+    en: 'Unsupported platform: {platform}',
+  },
+
+  // ── Auto Run ─────────────────────────────────
+  'auto_run.failed': {
+    ko: '자동 {direction} 실패: {message}',
+    en: 'Auto {direction} failed: {message}',
+  },
+  'auto_run.push_synced': {
+    ko: '{count}개 파일 동기화됨',
+    en: '{count} files synced',
+  },
+  'auto_run.pull_applied': {
+    ko: '{applied}개 파일 적용',
+    en: '{applied} files applied',
+  },
+  'auto_run.pull_applied_skipped': {
+    ko: '{applied}개 파일 적용, {skipped}개 건너뜀',
+    en: '{applied} files applied, {skipped} skipped',
+  },
 } as const;
 
 type MessageKey = keyof typeof messages;

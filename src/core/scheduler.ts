@@ -128,7 +128,7 @@ export function registerScheduler(intervalSeconds: number): void {
   } else if (process.platform === 'win32') {
     registerSchtasks(cliArgs, intervalSeconds);
   } else {
-    throw new Error(`Unsupported platform: ${process.platform}`);
+    throw new Error(t('error.unsupported_platform').replace('{platform}', process.platform));
   }
 }
 
