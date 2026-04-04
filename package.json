@@ -1,6 +1,6 @@
 {
   "name": "claudesync",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Sync Claude Code settings across machines via GitHub Gist",
   "type": "module",
   "bin": {
@@ -16,7 +16,13 @@
     "bin",
     "dist"
   ],
-  "keywords": ["claude", "claude-code", "sync", "settings", "gist"],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "sync",
+    "settings",
+    "gist"
+  ],
   "author": "cares0",
   "license": "MIT",
   "engines": {
