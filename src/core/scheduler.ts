@@ -2,6 +2,7 @@ import { writeFileSync, unlinkSync, existsSync, mkdirSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
+import { t } from '../utils/i18n.js';
 
 const LAUNCHD_LABEL = 'com.claudesync.auto';
 const SYSTEMD_SERVICE = 'claudesync-auto';
@@ -112,7 +113,7 @@ function resolveCliArgs(): string[] {
     return [process.execPath, scriptPath];
   }
 
-  throw new Error('claudesync CLI 경로를 찾을 수 없습니다. 글로벌 설치를 권장합니다: npm install -g claudesync');
+  throw new Error(t('error.cli_not_found'));
 }
 
 // ── Register / Unregister ───────────────────────────────────

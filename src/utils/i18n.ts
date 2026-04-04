@@ -590,11 +590,125 @@ const messages = {
     ko: '리비전 {sha}로 복원 완료!',
     en: 'Restored to revision {sha}!',
   },
+
+  // ── Auto (additional) ────────────────────────
+  'auto.no_gist': {
+    ko: 'Gist가 연결되지 않았습니다. `claudesync push` 또는 `claudesync link <id>`를 먼저 실행하세요.',
+    en: 'No Gist linked. Run `claudesync push` or `claudesync link <id>` first.',
+  },
+  'auto.setup_cancelled': {
+    ko: '설정이 취소되었습니다.',
+    en: 'Setup cancelled.',
+  },
+  'auto.invalid_categories': {
+    ko: '유효한 카테고리가 없습니다. 전체 카테고리로 설정합니다.',
+    en: 'No valid categories. Using all categories.',
+  },
+  'auto.scheduler_failed': {
+    ko: '스케줄러 등록 실패: {error}',
+    en: 'Scheduler registration failed: {error}',
+  },
+  'auto.primary_register_failed': {
+    ko: 'Primary 디바이스 정보를 Gist에 등록하지 못했습니다. 다음 auto push 시 등록됩니다.',
+    en: 'Failed to register primary device to Gist. It will be registered on next auto push.',
+  },
+  'auto.summary_direction': {
+    ko: '방향',
+    en: 'Direction',
+  },
+  'auto.summary_interval': {
+    ko: '주기',
+    en: 'Interval',
+  },
+  'auto.summary_categories': {
+    ko: '카테고리',
+    en: 'Categories',
+  },
+  'auto.summary_encrypt': {
+    ko: '암호화',
+    en: 'Encrypt',
+  },
+  'auto.summary_conflict': {
+    ko: '충돌 정책',
+    en: 'Conflict',
+  },
+  'auto.yes': {
+    ko: '예',
+    en: 'Yes',
+  },
+  'auto.no': {
+    ko: '아니오',
+    en: 'No',
+  },
+
+  // ── Auto Status (additional) ─────────────────
+  'auto.status_enabled': {
+    ko: '활성',
+    en: 'Enabled',
+  },
+  'auto.status_disabled': {
+    ko: '비활성',
+    en: 'Disabled',
+  },
+  'auto.interval_seconds': {
+    ko: '{n}초',
+    en: '{n}s',
+  },
+  'auto.interval_minutes': {
+    ko: '{n}분',
+    en: '{n}m',
+  },
+  'auto.interval_hours': {
+    ko: '{n}시간',
+    en: '{n}h',
+  },
+  'auto.interval_days': {
+    ko: '{n}일',
+    en: '{n}d',
+  },
+  'auto.status_label': {
+    ko: '상태',
+    en: 'Status',
+  },
+  'auto.created_label': {
+    ko: '생성일',
+    en: 'Created',
+  },
+  'auto.primary_device_label': {
+    ko: 'Primary 디바이스',
+    en: 'Primary Device',
+  },
+  'auto.this_machine': {
+    ko: '(이 머신)',
+    en: '(this machine)',
+  },
+  'auto.since_label': {
+    ko: '등록일',
+    en: 'Since',
+  },
+  'auto.recent_logs_label': {
+    ko: '최근 로그',
+    en: 'Recent Logs',
+  },
+
+  // ── Core errors ──────────────────────────────
+  'error.cli_not_found': {
+    ko: 'claudesync CLI 경로를 찾을 수 없습니다. 글로벌 설치를 권장합니다: npm install -g claudesync',
+    en: 'claudesync CLI path not found. Global install recommended: npm install -g claudesync',
+  },
+  'auth.device_url': {
+    ko: '  URL: {url}',
+    en: '  URL: {url}',
+  },
+  'auth.device_code': {
+    ko: '  코드: {code}',
+    en: '  Code: {code}',
+  },
 } as const;
 
 type MessageKey = keyof typeof messages;
 
-let currentLang: Lang = 'ko';
+let currentLang: Lang = 'en';
 
 export function setLang(lang: Lang): void {
   currentLang = lang;

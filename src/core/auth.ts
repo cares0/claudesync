@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync, chmodSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { authFilePath } from '../utils/paths.js';
 import type { AuthConfig } from '../types.js';
+import { t } from '../utils/i18n.js';
 
 const KEYCHAIN_SERVICE = 'claudesync';
 const KEYCHAIN_ACCOUNT = 'github-token';
@@ -171,8 +172,8 @@ export async function deviceFlow(): Promise<string> {
     expires_in: number;
   };
 
-  console.log(`\n  URL: ${codeData.verification_uri}`);
-  console.log(`  Code: ${codeData.user_code}\n`);
+  console.log(`\n${t('auth.device_url').replace('{url}', codeData.verification_uri)}`);
+  console.log(`${t('auth.device_code').replace('{code}', codeData.user_code)}\n`);
 
   // Step 2: Poll for token
   const interval = (codeData.interval || 5) * 1000;
