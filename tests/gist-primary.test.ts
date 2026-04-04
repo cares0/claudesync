@@ -16,6 +16,7 @@ describe('SyncMeta primary_device', () => {
       file_map: {},
       categories: ['settings'],
       primary_device: {
+        machine_id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
         machine: 'macbook-pro',
         hostname: 'macbook-pro.local',
         platform: 'darwin-arm64',

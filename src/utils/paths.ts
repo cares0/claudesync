@@ -1,6 +1,7 @@
 import { homedir, hostname } from 'node:os';
 import { join, resolve, relative, normalize } from 'node:path';
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
 
 /** ~/.claude */
 export function claudeDir(): string {
@@ -47,6 +48,23 @@ export function machineName(): string {
 /** Get platform string (e.g. "darwin-arm64") */
 export function platformString(): string {
   return `${process.platform}-${process.arch}`;
+}
+
+/** ~/.claudesync/machine-id */
+export function machineIdPath(): string {
+  return join(configDir(), 'machine-id');
+}
+
+/** Get or create a persistent unique machine ID */
+export function getMachineId(): string {
+  const path = machineIdPath();
+  if (existsSync(path)) {
+    const id = readFileSync(path, 'utf-8').trim();
+    if (id) return id;
+  }
+  const id = randomUUID();
+  writeFileSync(path, id, 'utf-8');
+  return id;
 }
 
 /** ~/.claudesync/auto.json */

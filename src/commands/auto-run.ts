@@ -8,7 +8,7 @@ import { getGist, updateGist, createGist, parseMeta } from '../core/gist.js';
 import { compareForPush, compareForPull } from '../core/conflict.js';
 import { detectSecrets, redactContent } from '../core/redactor.js';
 import { encrypt as encryptContent, decrypt, isEncrypted } from '../core/crypto.js';
-import { claudeDir, isPathSafe, machineName, platformString } from '../utils/paths.js';
+import { claudeDir, isPathSafe, machineName, platformString, getMachineId } from '../utils/paths.js';
 import type { AutoConfig, ScannedFile, PrimaryDevice } from '../types.js';
 import { writeFileSync, mkdirSync, existsSync, copyFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -59,7 +59,7 @@ async function autoRunPush(
     const meta = parseMeta(gist);
     if (meta?.primary_device) {
       const primary = meta.primary_device;
-      if (primary.machine !== machineName() || primary.hostname !== hostname()) {
+      if (primary.machine_id !== getMachineId()) {
         appendLog('push', 'skipped', `Not primary device (primary: ${primary.machine})`);
         return;
       }
@@ -112,6 +112,7 @@ async function autoRunPush(
     );
 
     const primaryDevice: PrimaryDevice = {
+      machine_id: getMachineId(),
       machine: machineName(),
       hostname: hostname(),
       platform: platformString(),

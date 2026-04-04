@@ -4,7 +4,7 @@ import { loadAutoConfig } from '../core/auto-config.js';
 import { readRecentLogs } from '../core/auto-log.js';
 import { loadConfig } from '../core/auth.js';
 import { getGist, parseMeta } from '../core/gist.js';
-import { machineName } from '../utils/paths.js';
+import { getMachineId } from '../utils/paths.js';
 
 function formatInterval(seconds: number): string {
   if (seconds < 60) return `${seconds}초`;
@@ -41,7 +41,7 @@ export async function runAutoStatus(): Promise<void> {
       const meta = parseMeta(gist);
       if (meta?.primary_device) {
         const pd = meta.primary_device;
-        const isMe = pd.machine === machineName();
+        const isMe = pd.machine_id === getMachineId();
         console.log();
         console.log(`  ${c.bold('Primary Device:')}`);
         console.log(`    Machine:  ${pd.machine} ${isMe ? c.green('(this machine)') : ''}`);

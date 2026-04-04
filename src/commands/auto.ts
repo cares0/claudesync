@@ -4,7 +4,7 @@ import { loadConfig } from '../core/auth.js';
 import { getGist, parseMeta } from '../core/gist.js';
 import { saveAutoConfig } from '../core/auto-config.js';
 import { registerScheduler, unregisterScheduler } from '../core/scheduler.js';
-import { machineName, platformString } from '../utils/paths.js';
+import { machineName, platformString, getMachineId } from '../utils/paths.js';
 import { CATEGORIES } from '../types.js';
 import type { AutoConfig, AutoDirection, PullConflictPolicy, Category, PrimaryDevice } from '../types.js';
 import { hostname } from 'node:os';
@@ -60,7 +60,7 @@ export async function runAuto(): Promise<void> {
       const meta = parseMeta(gist);
       if (meta?.primary_device) {
         const current = meta.primary_device;
-        const isMe = current.machine === machineName() && current.hostname === hostname();
+        const isMe = current.machine_id === getMachineId();
         if (!isMe) {
           console.log();
           warn(
@@ -80,6 +80,7 @@ export async function runAuto(): Promise<void> {
     }
 
     primaryDevice = {
+      machine_id: getMachineId(),
       machine: machineName(),
       hostname: hostname(),
       platform: platformString(),

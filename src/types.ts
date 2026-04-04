@@ -131,6 +131,7 @@ export interface AutoConfig {
 }
 
 export interface PrimaryDevice {
+  machine_id: string;
   machine: string;
   hostname: string;
   platform: string;
