@@ -1,5 +1,5 @@
 import { hostname } from 'node:os';
-import type { Gist, GistRevision, SyncMeta, ScannedFile } from '../types.js';
+import type { Gist, GistRevision, SyncMeta, ScannedFile, PrimaryDevice } from '../types.js';
 import { machineName, platformString } from '../utils/paths.js';
 import { CATEGORIES } from '../types.js';
 
@@ -45,8 +45,9 @@ export async function createGist(
   files: ScannedFile[],
   encryptedFiles?: Set<string>,
   message?: string,
+  primaryDevice?: PrimaryDevice,
 ): Promise<Gist> {
-  const meta = buildMeta(files, encryptedFiles, message);
+  const meta = buildMeta(files, encryptedFiles, message, primaryDevice);
   const gistFiles: Record<string, { content: string }> = {
     [META_FILE]: { content: JSON.stringify(meta, null, 2) },
   };
@@ -73,8 +74,9 @@ export async function updateGist(
   deletedFiles?: string[],
   encryptedFiles?: Set<string>,
   message?: string,
+  primaryDevice?: PrimaryDevice,
 ): Promise<Gist> {
-  const meta = buildMeta(files, encryptedFiles, message);
+  const meta = buildMeta(files, encryptedFiles, message, primaryDevice);
   const gistFiles: Record<string, { content: string } | null> = {
     [META_FILE]: { content: JSON.stringify(meta, null, 2) },
   };
@@ -123,7 +125,7 @@ export function parseMeta(gist: Gist): SyncMeta | null {
 }
 
 // ── Build _meta.json ────────────────────────────────────────
-function buildMeta(files: ScannedFile[], encryptedFiles?: Set<string>, message?: string): SyncMeta {
+function buildMeta(files: ScannedFile[], encryptedFiles?: Set<string>, message?: string, primaryDevice?: PrimaryDevice): SyncMeta {
   const fileMap: SyncMeta['file_map'] = {};
   for (const f of files) {
     fileMap[f.gistFilename] = {
@@ -146,6 +148,7 @@ function buildMeta(files: ScannedFile[], encryptedFiles?: Set<string>, message?:
     },
     file_map: fileMap,
     categories: [...CATEGORIES],
+    ...(primaryDevice && { primary_device: primaryDevice }),
   };
 }
 

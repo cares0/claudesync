@@ -25,6 +25,7 @@ export interface SyncMeta {
   };
   file_map: Record<string, FileMapEntry>;
   categories: Category[];
+  primary_device?: PrimaryDevice;
 }
 
 export interface FileMapEntry {
