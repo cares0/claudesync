@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, unlinkSync, existsSync } from 'node:fs';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { pendingNotificationsPath } from '../utils/paths.js';
 
 interface PendingNotification {
@@ -12,23 +12,23 @@ interface PendingNotification {
 export function sendOsNotification(title: string, message: string): void {
   try {
     if (process.platform === 'darwin') {
-      execSync(
-        `osascript -e 'display notification "${message}" with title "${title}"'`,
-        { stdio: 'ignore' },
-      );
+      execFileSync('osascript', [
+        '-e',
+        `display notification "${message}" with title "${title}"`,
+      ], { stdio: 'ignore' });
     } else if (process.platform === 'linux') {
-      execSync(`notify-send "${title}" "${message}"`, { stdio: 'ignore' });
+      execFileSync('notify-send', [title, message], { stdio: 'ignore' });
     } else if (process.platform === 'win32') {
-      const ps = `
-        [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
-        $template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
-        $textNodes = $template.GetElementsByTagName('text')
-        $textNodes.Item(0).AppendChild($template.CreateTextNode('${title}')) | Out-Null
-        $textNodes.Item(1).AppendChild($template.CreateTextNode('${message}')) | Out-Null
-        $toast = [Windows.UI.Notifications.ToastNotification]::new($template)
-        [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('claudesync').Show($toast)
-      `.trim();
-      execSync(`powershell -Command "${ps.replace(/"/g, '\\"')}"`, { stdio: 'ignore' });
+      const ps = [
+        '[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null',
+        `$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)`,
+        `$textNodes = $template.GetElementsByTagName('text')`,
+        `$textNodes.Item(0).AppendChild($template.CreateTextNode('${title}')) | Out-Null`,
+        `$textNodes.Item(1).AppendChild($template.CreateTextNode('${message}')) | Out-Null`,
+        `$toast = [Windows.UI.Notifications.ToastNotification]::new($template)`,
+        `[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('claudesync').Show($toast)`,
+      ].join('; ');
+      execFileSync('powershell', ['-Command', ps], { stdio: 'ignore' });
     }
   } catch {
     // Notification is best-effort — never fail the sync
