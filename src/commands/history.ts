@@ -12,7 +12,7 @@ export async function runHistory(): Promise<void> {
     return;
   }
   if (!config.gist_id) {
-    error('Gist가 연결되지 않았습니다.');
+    error(t('history.no_gist'));
     return;
   }
 
@@ -24,7 +24,7 @@ export async function runHistory(): Promise<void> {
   }
 
   const revisions = allRevisions.slice(0, MAX_REVISIONS);
-  info(`최근 ${revisions.length}개 리비전의 메시지를 불러오는 중...`);
+  info(t('history.loading').replace('{count}', String(revisions.length)));
 
   // Fetch _meta.json from each revision to get the message
   const messages = await Promise.all(
@@ -53,9 +53,9 @@ export async function runHistory(): Promise<void> {
   }
 
   if (allRevisions.length > MAX_REVISIONS) {
-    console.log(c.dim(`  ... 외 ${allRevisions.length - MAX_REVISIONS}개`));
+    console.log(c.dim(`  ${t('history.more').replace('{count}', String(allRevisions.length - MAX_REVISIONS))}`));
   }
 
-  console.log(`\n총 ${allRevisions.length}개 리비전`);
-  console.log(c.dim('복원: claudesync rollback <version>'));
+  console.log(`\n${t('history.total').replace('{count}', String(allRevisions.length))}`);
+  console.log(c.dim(t('history.rollback_hint')));
 }

@@ -472,6 +472,124 @@ const messages = {
     ko: '총 {count}개 파일에 차이가 있습니다.',
     en: '{count} file(s) have differences.',
   },
+
+  // ── Status (additional) ──────────────────────
+  'status.title': {
+    ko: 'claudesync 상태',
+    en: 'claudesync status',
+  },
+  'status.auth_label': {
+    ko: '인증',
+    en: 'Auth',
+  },
+  'status.gist_label': {
+    ko: 'Gist',
+    en: 'Gist',
+  },
+  'status.last_sync': {
+    ko: '마지막 동기화:',
+    en: 'Last sync:',
+  },
+  'status.machine': {
+    ko: '머신',
+    en: 'Machine',
+  },
+  'status.host': {
+    ko: '호스트',
+    en: 'Host',
+  },
+  'status.platform': {
+    ko: '플랫폼',
+    en: 'Platform',
+  },
+  'status.time': {
+    ko: '시간',
+    en: 'Time',
+  },
+  'status.file_count': {
+    ko: '파일 수',
+    en: 'Files',
+  },
+  'status.remote_files': {
+    ko: '원격 파일: {count}개',
+    en: 'Remote files: {count}',
+  },
+  'status.gist_fetch_failed': {
+    ko: 'Gist 조회 실패 — 네트워크를 확인하세요',
+    en: 'Failed to fetch Gist — check your network',
+  },
+  'status.current_machine': {
+    ko: '현재 머신',
+    en: 'Current machine',
+  },
+
+  // ── History (additional) ─────────────────────
+  'history.no_gist': {
+    ko: 'Gist가 연결되지 않았습니다.',
+    en: 'No Gist linked.',
+  },
+  'history.loading': {
+    ko: '최근 {count}개 리비전의 메시지를 불러오는 중...',
+    en: 'Loading messages for {count} recent revision(s)...',
+  },
+  'history.more': {
+    ko: '... 외 {count}개',
+    en: '... and {count} more',
+  },
+  'history.total': {
+    ko: '총 {count}개 리비전',
+    en: '{count} revision(s) total',
+  },
+  'history.rollback_hint': {
+    ko: '복원: claudesync rollback <version>',
+    en: 'Restore: claudesync rollback <version>',
+  },
+
+  // ── Rollback ─────────────────────────────────
+  'rollback.no_gist': {
+    ko: 'Gist가 연결되지 않았습니다.',
+    en: 'No Gist linked.',
+  },
+  'rollback.not_found': {
+    ko: "리비전 '{version}'을 찾을 수 없습니다. `claudesync history`로 확인하세요.",
+    en: "Revision '{version}' not found. Run `claudesync history` to check.",
+  },
+  'rollback.restoring': {
+    ko: '리비전 {sha} ({date})을 복원합니다.',
+    en: 'Restoring revision {sha} ({date}).',
+  },
+  'rollback.target_heading': {
+    ko: '복원 대상:',
+    en: 'Restore targets:',
+  },
+  'rollback.new_file': {
+    ko: '(새 파일)',
+    en: '(new file)',
+  },
+  'rollback.decrypt_failed': {
+    ko: '복호화 실패: {path}',
+    en: 'Decryption failed: {path}',
+  },
+  'rollback.no_changes': {
+    ko: '현재 상태와 동일합니다.',
+    en: 'Already at this state.',
+  },
+  'rollback.files_changed': {
+    ko: '{count}개 파일이 변경됩니다.',
+    en: '{count} file(s) will be changed.',
+  },
+  'rollback.confirm': {
+    ko: '복원하시겠습니까?',
+    en: 'Restore?',
+  },
+  'rollback.cancelled': {
+    ko: '복원이 취소되었습니다.',
+    en: 'Restore cancelled.',
+  },
+  'rollback.success': {
+    ko: '리비전 {sha}로 복원 완료!',
+    en: 'Restored to revision {sha}!',
+  },
 } as const;
 
 type MessageKey = keyof typeof messages;
