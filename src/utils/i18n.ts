@@ -246,6 +246,132 @@ const messages = {
     ko: '알 수 없는 설정 키입니다. 사용 가능: lang',
     en: 'Unknown config key. Available: lang',
   },
+
+  // ── Help ─────────────────────────────────────
+  'help.usage': {
+    ko: '사용법: claudesync <command> [options]',
+    en: 'Usage: claudesync <command> [options]',
+  },
+  'help.commands': {
+    ko: '명령어:',
+    en: 'Commands:',
+  },
+  'help.options': {
+    ko: '옵션:',
+    en: 'Options:',
+  },
+  'help.init': {
+    ko: '인증 설정 (OAuth Device Flow)',
+    en: 'Set up authentication (OAuth Device Flow)',
+  },
+  'help.init_token': {
+    ko: 'PAT 수동 입력',
+    en: 'Manual PAT input',
+  },
+  'help.link': {
+    ko: '기존 Gist 연결',
+    en: 'Link existing Gist',
+  },
+  'help.push': {
+    ko: '로컬 → Gist 업로드',
+    en: 'Upload local → Gist',
+  },
+  'help.pull': {
+    ko: 'Gist → 로컬 복원',
+    en: 'Restore Gist → local',
+  },
+  'help.diff': {
+    ko: '로컬 vs 원격 비교',
+    en: 'Compare local vs remote',
+  },
+  'help.status': {
+    ko: '인증/동기화 상태 확인',
+    en: 'Check auth/sync status',
+  },
+  'help.list': {
+    ko: '동기화 대상 로컬 파일 목록',
+    en: 'List local files to sync',
+  },
+  'help.history': {
+    ko: 'Gist revision 히스토리',
+    en: 'Gist revision history',
+  },
+  'help.rollback': {
+    ko: '특정 버전으로 복원',
+    en: 'Restore to specific version',
+  },
+  'help.auto': {
+    ko: '자동 동기화 설정 (인터랙티브)',
+    en: 'Set up auto sync (interactive)',
+  },
+  'help.auto_disable': {
+    ko: '자동 동기화 해제',
+    en: 'Disable auto sync',
+  },
+  'help.auto_status': {
+    ko: '자동 동기화 상태 확인',
+    en: 'Check auto sync status',
+  },
+  'help.config': {
+    ko: '설정 관리',
+    en: 'Manage configuration',
+  },
+  'help.opt_message': {
+    ko: 'push 시 메시지 기록 (history에서 표시)',
+    en: 'Record message on push (shown in history)',
+  },
+  'help.opt_only': {
+    ko: '카테고리 필터 (settings|instructions|hooks|skills|plugins|teams|ui)',
+    en: 'Category filter (settings|instructions|hooks|skills|plugins|teams|ui)',
+  },
+  'help.opt_force': {
+    ko: '확인 없이 실행',
+    en: 'Run without confirmation',
+  },
+  'help.opt_encrypt': {
+    ko: '암호화 활성화',
+    en: 'Enable encryption',
+  },
+  'help.opt_lang': {
+    ko: '언어 설정',
+    en: 'Set language',
+  },
+  'help.opt_help': {
+    ko: '도움말',
+    en: 'Help',
+  },
+  'help.opt_version': {
+    ko: '버전 정보',
+    en: 'Version info',
+  },
+
+  // ── CLI ──────────────────────────────────────
+  'cli.link_usage': {
+    ko: 'Usage: claudesync link <gist-id>',
+    en: 'Usage: claudesync link <gist-id>',
+  },
+  'cli.rollback_usage': {
+    ko: 'Usage: claudesync rollback <version>',
+    en: 'Usage: claudesync rollback <version>',
+  },
+  'cli.list_empty': {
+    ko: '동기화 대상 파일 없음',
+    en: 'No files to sync',
+  },
+  'cli.list_total': {
+    ko: '총 {count}개 파일',
+    en: '{count} files total',
+  },
+  'cli.unknown_command': {
+    ko: '알 수 없는 명령어: {command}',
+    en: 'Unknown command: {command}',
+  },
+
+  // ── Terminal ─────────────────────────────────
+  'terminal.select_prompt': {
+    ko: '선택 (1-{max}):',
+    en: 'Choose (1-{max}):',
+  },
 } as const;
 
 type MessageKey = keyof typeof messages;

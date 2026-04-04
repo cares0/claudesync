@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { setLang, getLang, t, detectLang, loadLangConfig, saveLangConfig } from '../src/utils/i18n.js';
+import { setLang, t, detectLang, loadLangConfig } from '../src/utils/i18n.js';
 
 describe('i18n', () => {
   beforeEach(() => {

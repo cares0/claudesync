@@ -1,4 +1,5 @@
 import { createInterface } from 'node:readline';
+import { t } from './i18n.js';
 
 // ── ANSI Colors ─────────────────────────────────────────────
 const esc = (code: string) => `\x1b[${code}m`;
@@ -103,7 +104,7 @@ export async function select(message: string, options: string[]): Promise<number
   options.forEach((opt, i) => {
     console.log(`  ${c.bold(`${i + 1}.`)} ${opt}`);
   });
-  const answer = await ask(`${c.dim('선택 (1-' + options.length + '):')} `);
+  const answer = await ask(`${c.dim(t('terminal.select_prompt').replace('{max}', String(options.length)))} `);
   const idx = parseInt(answer.trim(), 10) - 1;
   if (idx >= 0 && idx < options.length) return idx;
   return 0;
