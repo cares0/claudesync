@@ -1,5 +1,5 @@
 import { setLang, detectLang, t } from './utils/i18n.js';
-import { error } from './utils/terminal.js';
+import { error, info, warn } from './utils/terminal.js';
 
 import { runInit } from './commands/init.js';
 import { runPush } from './commands/push.js';
@@ -8,6 +8,11 @@ import { runDiff } from './commands/diff.js';
 import { runStatus } from './commands/status.js';
 import { runHistory } from './commands/history.js';
 import { runRollback } from './commands/rollback.js';
+import { runAuto } from './commands/auto.js';
+import { runAutoRun } from './commands/auto-run.js';
+import { runAutoDisable } from './commands/auto-disable.js';
+import { runAutoStatus } from './commands/auto-status.js';
+import { getPendingNotifications, clearPendingNotifications } from './core/notify.js';
 import type { Category } from './types.js';
 import { CATEGORIES } from './types.js';
 
@@ -63,6 +68,9 @@ Commands:
   list                 동기화 대상 로컬 파일 목록
   history              Gist revision 히스토리
   rollback <version>   특정 버전으로 복원
+  auto                 자동 동기화 설정 (인터랙티브)
+  auto disable         자동 동기화 해제
+  auto status          자동 동기화 상태 확인
 
 Options:
   -m, --message <msg>  push 시 메시지 기록 (history에서 표시)
@@ -112,6 +120,19 @@ async function main() {
                   typeof flags['message'] === 'string' ? flags['message'] : undefined;
 
   try {
+    // Show pending notifications from auto sync
+    if (command !== 'auto-run') {
+      const notifications = getPendingNotifications();
+      if (notifications.length > 0) {
+        for (const n of notifications) {
+          if (n.level === 'error') error(n.message);
+          else if (n.level === 'warning') warn(n.message);
+          else info(n.message);
+        }
+        clearPendingNotifications();
+        console.log();
+      }
+    }
     switch (command) {
       case 'init':
         await runInit({ useToken: !!flags['token'] });
@@ -157,6 +178,18 @@ async function main() {
           process.exit(1);
         }
         await runRollback(positional[0]);
+        break;
+      case 'auto':
+        if (positional[0] === 'disable') {
+          await runAutoDisable();
+        } else if (positional[0] === 'status') {
+          await runAutoStatus();
+        } else {
+          await runAuto();
+        }
+        break;
+      case 'auto-run':
+        await runAutoRun();
         break;
       default:
         error(`알 수 없는 명령어: ${command}`);

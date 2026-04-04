@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { toGistFilename, fromGistFilename, isPathSafe } from '../src/utils/paths.js';
+import { toGistFilename, fromGistFilename, isPathSafe, autoConfigPath, autoLogPath, lockFilePath, pendingNotificationsPath } from '../src/utils/paths.js';
+import { join } from 'node:path';
+import { homedir } from 'node:os';
 
 describe('toGistFilename', () => {
   it('converts slashes to double dashes', () => {
@@ -39,5 +41,23 @@ describe('isPathSafe', () => {
 
   it('rejects absolute paths', () => {
     expect(isPathSafe('/etc/passwd')).toBe(false);
+  });
+});
+
+describe('auto sync paths', () => {
+  it('autoConfigPath returns correct path', () => {
+    expect(autoConfigPath()).toBe(join(homedir(), '.claudesync', 'auto.json'));
+  });
+
+  it('autoLogPath returns correct path', () => {
+    expect(autoLogPath()).toBe(join(homedir(), '.claudesync', 'auto.log'));
+  });
+
+  it('lockFilePath returns correct path', () => {
+    expect(lockFilePath()).toBe(join(homedir(), '.claudesync', 'sync.lock'));
+  });
+
+  it('pendingNotificationsPath returns correct path', () => {
+    expect(pendingNotificationsPath()).toBe(join(homedir(), '.claudesync', 'notifications.json'));
   });
 });
