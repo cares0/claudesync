@@ -148,6 +148,7 @@ Sets up periodic sync via **launchd** (macOS), **systemd** (Linux), or **Task Sc
 claudesync config list             # Show all settings
 claudesync config lang ko          # Set language to Korean
 claudesync config lang en          # Set language to English
+claudesync config passphrase <val> # Set encryption passphrase
 ```
 
 ## Options
@@ -164,7 +165,7 @@ claudesync config lang en          # Set language to English
 
 ## How It Works
 
-Settings are stored as files in a single **private GitHub Gist**. Each file maps 1:1 to a Gist file, with directory separators converted to `--` (e.g. `hooks/pre-tool-use.sh` becomes `hooks--pre-tool-use.sh`).
+Settings are stored as files in a single **private GitHub Gist**. Each file maps 1:1 to a Gist file, with directory separators URL-encoded as `%2F` (e.g. `hooks/pre-tool-use.sh` becomes `hooks%2Fpre-tool-use.sh`).
 
 A `_meta.json` file in the Gist tracks file mappings, categories, encryption status, sync timestamps, machine info, and push messages. Gist's built-in revision history powers `history` and `rollback`.
 
@@ -173,7 +174,7 @@ A `_meta.json` file in the Gist tracks file mappings, categories, encryption sta
 - **Token storage** — macOS Keychain, Linux libsecret, or file with `chmod 600`
 - **Secret scanning** — 15 regex patterns + Shannon entropy analysis on every push
 - **Manual redaction** — add `# claudesync:redact` to any line to always exclude it
-- **Encryption** — `--encrypt` applies AES-256-GCM with scrypt key derivation
+- **Encryption** — `--encrypt` applies AES-256-GCM with scrypt key derivation, using a separate passphrase (prompted on first use, stored locally)
 - **Private Gists** — all Gists are created as private
 - **Path traversal protection** — blocks unsafe paths on pull/rollback
 - **Concurrent lock** — file-based lock prevents overlapping auto-sync runs
@@ -181,7 +182,7 @@ A `_meta.json` file in the Gist tracks file mappings, categories, encryption sta
 ## FAQ
 
 **Is my data safe?**
-Gists are private. Only someone with your GitHub token or the direct URL can see them. Use `--encrypt` for extra protection.
+Gists are private. Only someone with your GitHub token or the direct URL can see them. Use `--encrypt` for extra protection — you'll be asked to set a passphrase on first use, which must match on all machines.
 
 **Can I sync project-specific settings?**
 Not yet — only global `~/.claude/` settings are supported.

@@ -1,4 +1,4 @@
-import { writeFileSync, readFileSync, unlinkSync, existsSync } from 'node:fs';
+import { openSync, writeSync, closeSync, readFileSync, unlinkSync, existsSync, constants } from 'node:fs';
 import { lockFilePath } from '../utils/paths.js';
 
 const STALE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
@@ -21,13 +21,19 @@ export function acquireLock(): boolean {
         return false;
       }
     } catch {
-      unlinkSync(path);
+      try { unlinkSync(path); } catch { /* already removed */ }
     }
   }
 
   const lockData: LockData = { pid: process.pid, timestamp: Date.now() };
-  writeFileSync(path, JSON.stringify(lockData), 'utf-8');
-  return true;
+  try {
+    const fd = openSync(path, constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL);
+    writeSync(fd, JSON.stringify(lockData));
+    closeSync(fd);
+    return true;
+  } catch {
+    return false; // Another process created the lock between our check and write
+  }
 }
 
 export function releaseLock(): void {

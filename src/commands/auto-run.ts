@@ -35,9 +35,9 @@ export async function runAutoRun(): Promise<void> {
 
   try {
     if (autoConfig.direction === 'push') {
-      await autoRunPush(autoConfig, authConfig.token, authConfig.gist_id);
+      await autoRunPush(autoConfig, authConfig.token, authConfig.gist_id, authConfig.encrypt_passphrase);
     } else {
-      await autoRunPull(autoConfig, authConfig.token, authConfig.gist_id);
+      await autoRunPull(autoConfig, authConfig.token, authConfig.gist_id, authConfig.encrypt_passphrase);
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -54,6 +54,7 @@ async function autoRunPush(
   autoConfig: AutoConfig,
   token: string,
   gistId: string,
+  passphrase?: string,
 ): Promise<void> {
   // Check if this machine is still the primary device
   try {
@@ -90,12 +91,19 @@ async function autoRunPush(
 
   // Encrypt if configured
   const encryptedFiles = new Set<string>();
-  const finalFiles = autoConfig.encrypt
-    ? processedFiles.map((f) => {
-        encryptedFiles.add(f.gistFilename);
-        return { ...f, content: encryptContent(f.content, token) };
-      })
-    : processedFiles;
+  let finalFiles: ScannedFile[];
+  if (autoConfig.encrypt) {
+    if (!passphrase) {
+      appendLog('push', 'error', 'Encryption enabled but no passphrase configured');
+      return;
+    }
+    finalFiles = processedFiles.map((f) => {
+      encryptedFiles.add(f.gistFilename);
+      return { ...f, content: encryptContent(f.content, passphrase) };
+    });
+  } else {
+    finalFiles = processedFiles;
+  }
 
   // Compare with remote
   try {
@@ -126,6 +134,7 @@ async function autoRunPush(
   } catch (err) {
     if (String(err).includes('404')) {
       const primaryDevice: PrimaryDevice = {
+        machine_id: getMachineId(),
         machine: machineName(),
         hostname: hostname(),
         platform: platformString(),
@@ -143,6 +152,7 @@ async function autoRunPull(
   autoConfig: AutoConfig,
   token: string,
   gistId: string,
+  passphrase?: string,
 ): Promise<void> {
   const gist = await getGist(token, gistId);
   const localFiles = scanFiles();
@@ -175,8 +185,12 @@ async function autoRunPull(
     const metaEntry = meta?.file_map[change.gistFilename];
     const needsDecrypt = metaEntry?.encrypted || isEncrypted(content);
     if (needsDecrypt) {
+      if (!passphrase) {
+        appendLog('pull', 'error', `No passphrase for encrypted file: ${change.relativePath}`);
+        continue;
+      }
       try {
-        content = decrypt(content, token);
+        content = decrypt(content, passphrase);
       } catch {
         appendLog('pull', 'error', `Decrypt failed: ${change.relativePath}`);
         continue;

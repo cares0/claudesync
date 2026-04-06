@@ -5,13 +5,7 @@ import { readRecentLogs } from '../core/auto-log.js';
 import { loadConfig } from '../core/auth.js';
 import { getGist, parseMeta } from '../core/gist.js';
 import { getMachineId } from '../utils/paths.js';
-
-function formatInterval(seconds: number): string {
-  if (seconds < 60) return t('auto.interval_seconds').replace('{n}', String(seconds));
-  if (seconds < 3600) return t('auto.interval_minutes').replace('{n}', String(Math.round(seconds / 60)));
-  if (seconds < 86400) return t('auto.interval_hours').replace('{n}', String(Math.round(seconds / 3600)));
-  return t('auto.interval_days').replace('{n}', String(Math.round(seconds / 86400)));
-}
+import { formatInterval } from '../utils/format.js';
 
 export async function runAutoStatus(): Promise<void> {
   const autoConfig = loadAutoConfig();

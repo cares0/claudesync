@@ -21,14 +21,17 @@ export function authFilePath(): string {
 }
 
 /** Convert a relative path (from ~/.claude/) to a Gist-safe filename.
- *  e.g. "hooks/pre-tool-use.sh" → "hooks--pre-tool-use.sh" */
+ *  e.g. "hooks/pre-tool-use.sh" → "hooks%2Fpre-tool-use.sh" */
 export function toGistFilename(relativePath: string): string {
-  return relativePath.replace(/\//g, '--');
+  return relativePath.replace(/\//g, '%2F');
 }
 
 /** Convert a Gist filename back to a relative path.
- *  e.g. "hooks--pre-tool-use.sh" → "hooks/pre-tool-use.sh" */
+ *  Supports both new (%2F) and legacy (--) encoding. */
 export function fromGistFilename(gistFilename: string): string {
+  if (gistFilename.includes('%2F')) {
+    return gistFilename.replace(/%2F/g, '/');
+  }
   return gistFilename.replace(/--/g, '/');
 }
 

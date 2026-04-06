@@ -96,6 +96,7 @@ export interface AuthConfig {
   token: string;
   gist_id?: string;
   machine_name?: string;
+  encrypt_passphrase?: string;
 }
 
 // ── CLI ─────────────────────────────────────────────────────

@@ -691,6 +691,36 @@ const messages = {
     en: 'Recent Logs',
   },
 
+  // ── Encryption passphrase ─────────────────────
+  'encrypt.enter_passphrase': {
+    ko: '암호화 비밀번호를 입력하세요: ',
+    en: 'Enter encryption passphrase: ',
+  },
+  'encrypt.confirm_passphrase': {
+    ko: '비밀번호 확인: ',
+    en: 'Confirm passphrase: ',
+  },
+  'encrypt.mismatch': {
+    ko: '비밀번호가 일치하지 않습니다.',
+    en: 'Passphrases do not match.',
+  },
+  'encrypt.passphrase_saved': {
+    ko: '암호화 비밀번호가 저장되었습니다.',
+    en: 'Encryption passphrase saved.',
+  },
+  'encrypt.no_passphrase': {
+    ko: '암호화 비밀번호가 설정되지 않았습니다. `claudesync config passphrase`로 설정하세요.',
+    en: 'No encryption passphrase set. Run `claudesync config passphrase` to set one.',
+  },
+  'encrypt.passphrase_status_set': {
+    ko: '(설정됨)',
+    en: '(set)',
+  },
+  'encrypt.passphrase_status_not_set': {
+    ko: '(설정 안됨)',
+    en: '(not set)',
+  },
+
   // ── Core errors ──────────────────────────────
   'error.cli_not_found': {
     ko: 'claudesync CLI 경로를 찾을 수 없습니다. 글로벌 설치를 권장합니다: npm install -g claudesync',

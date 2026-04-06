@@ -1,6 +1,7 @@
 import { t } from '../utils/i18n.js';
-import { success, warn, error, heading, confirm, ask, select, c } from '../utils/terminal.js';
-import { loadConfig } from '../core/auth.js';
+import { success, warn, error, heading, confirm, ask, select, c, askHidden } from '../utils/terminal.js';
+import { loadConfig, saveConfig } from '../core/auth.js';
+import { formatInterval } from '../utils/format.js';
 import { getGist, parseMeta } from '../core/gist.js';
 import { saveAutoConfig } from '../core/auto-config.js';
 import { registerScheduler, unregisterScheduler } from '../core/scheduler.js';
@@ -23,13 +24,6 @@ function parseInterval(input: string): number | null {
     case 'd': return value * 86400;
     default: return null;
   }
-}
-
-function formatInterval(seconds: number): string {
-  if (seconds < 60) return `${seconds}s`;
-  if (seconds < 3600) return `${seconds / 60}m`;
-  if (seconds < 86400) return `${seconds / 3600}h`;
-  return `${seconds / 86400}d`;
 }
 
 export async function runAuto(): Promise<void> {
@@ -131,6 +125,23 @@ export async function runAuto(): Promise<void> {
 
   // 6. Encryption
   const encrypt = await confirm(t('auto.select_encrypt'), false);
+
+  // 6b. If encryption enabled, ensure passphrase is stored
+  if (encrypt && !config.encrypt_passphrase) {
+    const pp = await askHidden(t('encrypt.enter_passphrase'));
+    if (!pp.trim()) {
+      warn(t('auto.setup_cancelled'));
+      return;
+    }
+    const pp2 = await askHidden(t('encrypt.confirm_passphrase'));
+    if (pp !== pp2) {
+      error(t('encrypt.mismatch'));
+      return;
+    }
+    config.encrypt_passphrase = pp;
+    saveConfig(config);
+    success(t('encrypt.passphrase_saved'));
+  }
 
   // 7. Save config
   const autoConfig: AutoConfig = {

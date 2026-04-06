@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync, chmodSync, existsSync } from 'node:fs';
-import { execSync } from 'node:child_process';
+import { readFileSync, writeFileSync, chmodSync, existsSync, unlinkSync } from 'node:fs';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { authFilePath } from '../utils/paths.js';
 import type { AuthConfig } from '../types.js';
 import { t } from '../utils/i18n.js';
@@ -10,10 +10,12 @@ const KEYCHAIN_ACCOUNT = 'github-token';
 // ── Keychain (macOS) ────────────────────────────────────────
 function keychainSet(token: string): boolean {
   try {
-    execSync(
-      `security add-generic-password -U -s "${KEYCHAIN_SERVICE}" -a "${KEYCHAIN_ACCOUNT}" -w "${token}"`,
-      { stdio: 'ignore' },
-    );
+    execFileSync('security', [
+      'add-generic-password', '-U',
+      '-s', KEYCHAIN_SERVICE,
+      '-a', KEYCHAIN_ACCOUNT,
+      '-w', token,
+    ], { stdio: 'ignore' });
     return true;
   } catch {
     return false;
@@ -22,10 +24,12 @@ function keychainSet(token: string): boolean {
 
 function keychainGet(): string | null {
   try {
-    const result = execSync(
-      `security find-generic-password -s "${KEYCHAIN_SERVICE}" -a "${KEYCHAIN_ACCOUNT}" -w`,
-      { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] },
-    );
+    const result = execFileSync('security', [
+      'find-generic-password',
+      '-s', KEYCHAIN_SERVICE,
+      '-a', KEYCHAIN_ACCOUNT,
+      '-w',
+    ], { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });
     return result.trim();
   } catch {
     return null;
@@ -34,10 +38,11 @@ function keychainGet(): string | null {
 
 function keychainDelete(): boolean {
   try {
-    execSync(
-      `security delete-generic-password -s "${KEYCHAIN_SERVICE}" -a "${KEYCHAIN_ACCOUNT}"`,
-      { stdio: 'ignore' },
-    );
+    execFileSync('security', [
+      'delete-generic-password',
+      '-s', KEYCHAIN_SERVICE,
+      '-a', KEYCHAIN_ACCOUNT,
+    ], { stdio: 'ignore' });
     return true;
   } catch {
     return false;
@@ -47,11 +52,12 @@ function keychainDelete(): boolean {
 // ── Linux secret-tool ───────────────────────────────────────
 function secretToolSet(token: string): boolean {
   try {
-    execSync(
-      `echo -n "${token}" | secret-tool store --label="claudesync" service claudesync account github-token`,
-      { stdio: 'ignore' },
-    );
-    return true;
+    const result = spawnSync('secret-tool', [
+      'store', '--label=claudesync',
+      'service', 'claudesync',
+      'account', 'github-token',
+    ], { input: token, stdio: ['pipe', 'ignore', 'ignore'] });
+    return result.status === 0;
   } catch {
     return false;
   }
@@ -59,10 +65,9 @@ function secretToolSet(token: string): boolean {
 
 function secretToolGet(): string | null {
   try {
-    const result = execSync(
-      'secret-tool lookup service claudesync account github-token',
-      { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] },
-    );
+    const result = execFileSync('secret-tool', [
+      'lookup', 'service', 'claudesync', 'account', 'github-token',
+    ], { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });
     return result.trim() || null;
   } catch {
     return null;
@@ -131,9 +136,7 @@ export function saveConfig(config: AuthConfig): void {
 export function deleteAuth(): void {
   if (process.platform === 'darwin') keychainDelete();
   const path = authFilePath();
-  if (existsSync(path)) {
-    writeFileSync(path, '', 'utf-8');
-  }
+  if (existsSync(path)) unlinkSync(path);
 }
 
 /** Validate token by calling GitHub API */

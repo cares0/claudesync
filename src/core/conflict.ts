@@ -1,3 +1,4 @@
+import { diffLines } from 'diff';
 import type { FileChange, Category, ScannedFile, Gist } from '../types.js';
 import { fromGistFilename } from '../utils/paths.js';
 import { parseMeta } from './gist.js';
@@ -10,54 +11,60 @@ export function compareForPush(
   gist: Gist,
 ): FileChange[] {
   const changes: FileChange[] = [];
-  const localMap = new Map(localFiles.map((f) => [f.gistFilename, f]));
-  const remoteNames = new Set(
-    Object.keys(gist.files).filter((n) => n !== META_FILE),
-  );
+  const localMap = new Map(localFiles.map((f) => [f.relativePath, f]));
+  const meta = parseMeta(gist);
+
+  // Build remote map by relativePath (handles both old/new encoding)
+  const remoteMap = new Map<string, { gistFilename: string; content: string | undefined }>();
+  for (const [gistName, gistFile] of Object.entries(gist.files)) {
+    if (gistName === META_FILE) continue;
+    const entry = meta?.file_map[gistName];
+    const relativePath = entry?.path ?? fromGistFilename(gistName);
+    remoteMap.set(relativePath, { gistFilename: gistName, content: gistFile?.content ?? undefined });
+  }
 
   // Check local files against remote
-  for (const [gistName, local] of localMap) {
-    const remote = gist.files[gistName];
+  for (const [relPath, local] of localMap) {
+    const remote = remoteMap.get(relPath);
     if (!remote) {
       changes.push({
-        gistFilename: gistName,
-        relativePath: local.relativePath,
+        gistFilename: local.gistFilename,
+        relativePath: relPath,
         category: local.category,
         status: 'added',
         localContent: local.content,
       });
     } else if (remote.content !== local.content) {
       changes.push({
-        gistFilename: gistName,
-        relativePath: local.relativePath,
+        gistFilename: local.gistFilename,
+        relativePath: relPath,
         category: local.category,
         status: 'modified',
         localContent: local.content,
-        remoteContent: remote.content ?? undefined,
+        remoteContent: remote.content,
       });
     } else {
       changes.push({
-        gistFilename: gistName,
-        relativePath: local.relativePath,
+        gistFilename: local.gistFilename,
+        relativePath: relPath,
         category: local.category,
         status: 'unchanged',
         localContent: local.content,
-        remoteContent: remote.content ?? undefined,
+        remoteContent: remote.content,
       });
     }
-    remoteNames.delete(gistName);
+    remoteMap.delete(relPath);
   }
 
   // Files in remote but not local → deleted locally
-  const meta = parseMeta(gist);
-  for (const gistName of remoteNames) {
-    const entry = meta?.file_map[gistName];
+  for (const [relPath, remote] of remoteMap) {
+    const entry = meta?.file_map[remote.gistFilename];
     changes.push({
-      gistFilename: gistName,
-      relativePath: entry?.path ?? fromGistFilename(gistName),
+      gistFilename: remote.gistFilename,
+      relativePath: relPath,
       category: (entry?.category ?? 'settings') as Category,
       status: 'deleted',
-      remoteContent: gist.files[gistName]?.content ?? undefined,
+      remoteContent: remote.content,
     });
   }
 
@@ -70,17 +77,18 @@ export function compareForPull(
   localFiles: ScannedFile[],
 ): FileChange[] {
   const changes: FileChange[] = [];
-  const localMap = new Map(localFiles.map((f) => [f.gistFilename, f]));
+  const localMap = new Map(localFiles.map((f) => [f.relativePath, f]));
   const meta = parseMeta(gist);
 
   for (const [gistName, gistFile] of Object.entries(gist.files)) {
     if (gistName === META_FILE) continue;
     if (!gistFile?.content) continue;
 
-    const local = localMap.get(gistName);
     const entry = meta?.file_map[gistName];
     const relativePath = entry?.path ?? fromGistFilename(gistName);
     const category = (entry?.category ?? 'settings') as Category;
+
+    const local = localMap.get(relativePath);
 
     if (!local) {
       changes.push({
@@ -114,26 +122,17 @@ export function compareForPull(
   return changes;
 }
 
-/** Generate a simple unified diff between two strings */
+/** Generate a unified diff between two strings using LCS-based algorithm */
 export function simpleDiff(a: string, b: string): string[] {
-  const linesA = a.split('\n');
-  const linesB = b.split('\n');
+  const changes = diffLines(a, b);
   const result: string[] = [];
-
-  const maxLen = Math.max(linesA.length, linesB.length);
-  for (let i = 0; i < maxLen; i++) {
-    const lineA = linesA[i];
-    const lineB = linesB[i];
-
-    if (lineA === undefined) {
-      result.push(`+${lineB}`);
-    } else if (lineB === undefined) {
-      result.push(`-${lineA}`);
-    } else if (lineA !== lineB) {
-      result.push(`-${lineA}`);
-      result.push(`+${lineB}`);
+  for (const change of changes) {
+    const lines = change.value.replace(/\n$/, '').split('\n');
+    for (const line of lines) {
+      if (change.added) result.push(`+${line}`);
+      else if (change.removed) result.push(`-${line}`);
+      // unchanged lines omitted
     }
   }
-
   return result;
 }

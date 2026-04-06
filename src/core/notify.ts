@@ -8,13 +8,22 @@ interface PendingNotification {
   timestamp: string;
 }
 
+// ── Escaping helpers ───────────────────────────────────────
+function escapeAppleScript(s: string): string {
+  return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+function escapePowerShell(s: string): string {
+  return s.replace(/'/g, "''");
+}
+
 /** Send OS-native notification (best-effort, never throws) */
 export function sendOsNotification(title: string, message: string): void {
   try {
     if (process.platform === 'darwin') {
       execFileSync('osascript', [
         '-e',
-        `display notification "${message}" with title "${title}"`,
+        `display notification "${escapeAppleScript(message)}" with title "${escapeAppleScript(title)}"`,
       ], { stdio: 'ignore' });
     } else if (process.platform === 'linux') {
       execFileSync('notify-send', [title, message], { stdio: 'ignore' });
@@ -23,8 +32,8 @@ export function sendOsNotification(title: string, message: string): void {
         '[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null',
         `$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)`,
         `$textNodes = $template.GetElementsByTagName('text')`,
-        `$textNodes.Item(0).AppendChild($template.CreateTextNode('${title}')) | Out-Null`,
-        `$textNodes.Item(1).AppendChild($template.CreateTextNode('${message}')) | Out-Null`,
+        `$textNodes.Item(0).AppendChild($template.CreateTextNode('${escapePowerShell(title)}')) | Out-Null`,
+        `$textNodes.Item(1).AppendChild($template.CreateTextNode('${escapePowerShell(message)}')) | Out-Null`,
         `$toast = [Windows.UI.Notifications.ToastNotification]::new($template)`,
         `[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('claudesync').Show($toast)`,
       ].join('; ');

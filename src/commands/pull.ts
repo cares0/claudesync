@@ -1,8 +1,8 @@
 import { writeFileSync, mkdirSync, existsSync, copyFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { t } from '../utils/i18n.js';
-import { info, success, warn, error, heading, confirm, c, printDiff, select } from '../utils/terminal.js';
-import { loadConfig } from '../core/auth.js';
+import { info, success, warn, error, heading, confirm, c, printDiff, askHidden } from '../utils/terminal.js';
+import { loadConfig, saveConfig } from '../core/auth.js';
 import { scanFiles } from '../core/scanner.js';
 import { getGist, parseMeta } from '../core/gist.js';
 import { compareForPull, simpleDiff } from '../core/conflict.js';
@@ -41,10 +41,33 @@ export async function runPull(options: PullOptions): Promise<void> {
     success(t('pull.no_changes'));
     return;
   }
-  await applyChanges(toApply, config.token, options.force ?? false, meta);
+
+  // Check if any files need decryption
+  const hasEncrypted = toApply.some((c) => {
+    const metaEntry = meta?.file_map[c.gistFilename];
+    return metaEntry?.encrypted || (c.remoteContent && isEncrypted(c.remoteContent));
+  });
+
+  let passphrase: string | undefined;
+  if (hasEncrypted) {
+    if (config.encrypt_passphrase) {
+      passphrase = config.encrypt_passphrase;
+    } else {
+      const pp = await askHidden(t('encrypt.enter_passphrase'));
+      if (!pp.trim()) {
+        error(t('encrypt.no_passphrase'));
+        return;
+      }
+      passphrase = pp;
+      config.encrypt_passphrase = pp;
+      saveConfig(config);
+    }
+  }
+
+  await applyChanges(toApply, passphrase, options.force ?? false, meta);
 }
 
-async function applyChanges(changes: FileChange[], token: string, force: boolean, meta: SyncMeta | null): Promise<void> {
+async function applyChanges(changes: FileChange[], passphrase: string | undefined, force: boolean, meta: SyncMeta | null): Promise<void> {
   heading(t('pull.changes_heading'));
   for (const change of changes) {
     const icon =
@@ -96,8 +119,12 @@ async function applyChanges(changes: FileChange[], token: string, force: boolean
     const metaEntry = meta?.file_map[change.gistFilename];
     const needsDecrypt = metaEntry?.encrypted || isEncrypted(content);
     if (needsDecrypt) {
+      if (!passphrase) {
+        error(t('pull.decrypt_failed').replace('{path}', change.relativePath));
+        continue;
+      }
       try {
-        content = decrypt(content, token);
+        content = decrypt(content, passphrase);
       } catch {
         error(t('pull.decrypt_failed').replace('{path}', change.relativePath));
         continue;

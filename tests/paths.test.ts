@@ -4,27 +4,39 @@ import { join } from 'node:path';
 import { homedir } from 'node:os';
 
 describe('toGistFilename', () => {
-  it('converts slashes to double dashes', () => {
-    expect(toGistFilename('hooks/pre-tool-use.sh')).toBe('hooks--pre-tool-use.sh');
+  it('converts slashes to %2F', () => {
+    expect(toGistFilename('hooks/pre-tool-use.sh')).toBe('hooks%2Fpre-tool-use.sh');
   });
 
   it('handles deeply nested paths', () => {
-    expect(toGistFilename('skills/my-skill/SKILL.md')).toBe('skills--my-skill--SKILL.md');
+    expect(toGistFilename('skills/my-skill/SKILL.md')).toBe('skills%2Fmy-skill%2FSKILL.md');
   });
 
   it('passes through flat files unchanged', () => {
     expect(toGistFilename('settings.json')).toBe('settings.json');
   });
+
+  it('preserves double dashes in filenames', () => {
+    expect(toGistFilename('hooks/my--script.sh')).toBe('hooks%2Fmy--script.sh');
+  });
 });
 
 describe('fromGistFilename', () => {
-  it('converts double dashes back to slashes', () => {
+  it('converts %2F back to slashes (new encoding)', () => {
+    expect(fromGistFilename('hooks%2Fpre-tool-use.sh')).toBe('hooks/pre-tool-use.sh');
+  });
+
+  it('converts -- back to slashes (legacy encoding)', () => {
     expect(fromGistFilename('hooks--pre-tool-use.sh')).toBe('hooks/pre-tool-use.sh');
   });
 
   it('roundtrips with toGistFilename', () => {
     const original = 'teams/my-team/config.json';
     expect(fromGistFilename(toGistFilename(original))).toBe(original);
+  });
+
+  it('preserves double dashes when %2F is present', () => {
+    expect(fromGistFilename('hooks%2Fmy--script.sh')).toBe('hooks/my--script.sh');
   });
 });
 

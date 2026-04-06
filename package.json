@@ -36,9 +36,11 @@
   },
   "homepage": "https://github.com/cares0/claudesync",
   "devDependencies": {
+    "@types/diff": "^7.0.2",
+    "@types/node": "^20.0.0",
+    "diff": "^8.0.4",
     "tsup": "^8.0.0",
     "typescript": "^5.4.0",
-    "vitest": "^3.0.0",
-    "@types/node": "^20.0.0"
+    "vitest": "^3.0.0"
   }
 }

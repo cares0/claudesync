@@ -103,7 +103,8 @@ export function buildSchtasksXml(cliArgs: string[], intervalSeconds: number): st
 function resolveCliArgs(): string[] {
   // 1. Try global install → single binary
   try {
-    const bin = execSync('which claudesync', { encoding: 'utf-8' }).trim();
+    const whichCmd = process.platform === 'win32' ? 'where' : 'which';
+    const bin = execSync(`${whichCmd} claudesync`, { encoding: 'utf-8' }).trim();
     return [bin];
   } catch { /* not globally installed */ }
 

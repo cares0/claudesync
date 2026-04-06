@@ -1,8 +1,8 @@
 import { writeFileSync, mkdirSync, existsSync, copyFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { t } from '../utils/i18n.js';
-import { info, success, warn, error, heading, confirm, c, printDiff } from '../utils/terminal.js';
-import { loadConfig } from '../core/auth.js';
+import { info, success, warn, error, heading, confirm, c, printDiff, askHidden } from '../utils/terminal.js';
+import { loadConfig, saveConfig } from '../core/auth.js';
 import { getGistAtRevision, parseMeta, getHistory } from '../core/gist.js';
 import { scanFiles } from '../core/scanner.js';
 import { simpleDiff } from '../core/conflict.js';
@@ -37,11 +37,11 @@ export async function runRollback(version: string): Promise<void> {
   const gist = await getGistAtRevision(config.token, config.gist_id, fullSha);
   const meta = parseMeta(gist);
   const localFiles = scanFiles();
-  const localMap = new Map(localFiles.map((f) => [f.gistFilename, f]));
+  const localMap = new Map(localFiles.map((f) => [f.relativePath, f]));
   const base = claudeDir();
 
   // Show diff
-  const filesToApply: Array<{ relativePath: string; content: string }> = [];
+  const filesToApply: Array<{ relativePath: string; content: string; needsDecrypt: boolean }> = [];
 
   heading(t('rollback.target_heading'));
   for (const [gistName, gistFile] of Object.entries(gist.files)) {
@@ -49,7 +49,7 @@ export async function runRollback(version: string): Promise<void> {
 
     const entry = meta?.file_map[gistName];
     const relativePath = entry?.path ?? fromGistFilename(gistName);
-    const local = localMap.get(gistName);
+    const local = localMap.get(relativePath);
 
     if (!local) {
       console.log(`  ${c.green('+')} ${relativePath} ${t('rollback.new_file')}`);
@@ -63,22 +63,34 @@ export async function runRollback(version: string): Promise<void> {
       continue; // unchanged
     }
 
-    let content = gistFile.content;
-    const needsDecrypt = entry?.encrypted || isEncrypted(content);
-    if (needsDecrypt) {
-      try {
-        content = decrypt(content, config.token);
-      } catch {
-        error(t('rollback.decrypt_failed').replace('{path}', relativePath));
-        continue;
-      }
-    }
-    filesToApply.push({ relativePath, content });
+    filesToApply.push({
+      relativePath,
+      content: gistFile.content,
+      needsDecrypt: !!(entry?.encrypted || isEncrypted(gistFile.content)),
+    });
   }
 
   if (filesToApply.length === 0) {
     success(t('rollback.no_changes'));
     return;
+  }
+
+  // If any files need decryption, get passphrase
+  const hasEncrypted = filesToApply.some((f) => f.needsDecrypt);
+  let passphrase: string | undefined;
+  if (hasEncrypted) {
+    if (config.encrypt_passphrase) {
+      passphrase = config.encrypt_passphrase;
+    } else {
+      const pp = await askHidden(t('encrypt.enter_passphrase'));
+      if (!pp.trim()) {
+        error(t('encrypt.no_passphrase'));
+        return;
+      }
+      passphrase = pp;
+      config.encrypt_passphrase = pp;
+      saveConfig(config);
+    }
   }
 
   console.log(`\n${t('rollback.files_changed').replace('{count}', String(filesToApply.length))}`);
@@ -90,13 +102,27 @@ export async function runRollback(version: string): Promise<void> {
   }
 
   // Apply
-  for (const { relativePath, content } of filesToApply) {
-    if (!isPathSafe(relativePath)) {
-      error(`${t('error.path_unsafe')} ${relativePath}`);
+  for (const file of filesToApply) {
+    if (!isPathSafe(file.relativePath)) {
+      error(`${t('error.path_unsafe')} ${file.relativePath}`);
       continue;
     }
 
-    const targetPath = join(base, relativePath);
+    let content = file.content;
+    if (file.needsDecrypt) {
+      if (!passphrase) {
+        error(t('rollback.decrypt_failed').replace('{path}', file.relativePath));
+        continue;
+      }
+      try {
+        content = decrypt(content, passphrase);
+      } catch {
+        error(t('rollback.decrypt_failed').replace('{path}', file.relativePath));
+        continue;
+      }
+    }
+
+    const targetPath = join(base, file.relativePath);
     if (existsSync(targetPath)) {
       copyFileSync(targetPath, targetPath + '.bak');
     }

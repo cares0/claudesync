@@ -36,7 +36,9 @@ export async function findGist(token: string): Promise<Gist | null> {
 
 // ── Get Gist by ID ──────────────────────────────────────────
 export async function getGist(token: string, gistId: string): Promise<Gist> {
-  return apiRequest<Gist>(`${API}/gists/${gistId}`, token);
+  const gist = await apiRequest<Gist>(`${API}/gists/${gistId}`, token);
+  await resolveTruncatedFiles(gist, token);
+  return gist;
 }
 
 // ── Create new Gist ─────────────────────────────────────────
@@ -110,7 +112,23 @@ export async function getGistAtRevision(
   gistId: string,
   sha: string,
 ): Promise<Gist> {
-  return apiRequest<Gist>(`${API}/gists/${gistId}/${sha}`, token);
+  const gist = await apiRequest<Gist>(`${API}/gists/${gistId}/${sha}`, token);
+  await resolveTruncatedFiles(gist, token);
+  return gist;
+}
+
+// ── Resolve truncated files ─────────────────────────────────
+async function resolveTruncatedFiles(gist: Gist, token: string): Promise<void> {
+  for (const file of Object.values(gist.files)) {
+    if (file?.truncated && file.raw_url) {
+      try {
+        const res = await fetch(file.raw_url, { headers: headers(token) });
+        if (res.ok) file.content = await res.text();
+      } catch {
+        // best-effort — use truncated content as fallback
+      }
+    }
+  }
 }
 
 // ── Parse meta from Gist ────────────────────────────────────
