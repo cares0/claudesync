@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/cares0/claudesync/compare/claude-settings-sync-v0.4.0...claude-settings-sync-v0.4.1) (2026-04-06)
+
+
+### Bug Fixes
+
+* read version from package.json and output banner to stdout ([ae951f3](https://github.com/cares0/claudesync/commit/ae951f3fc275aee84ee7f47dab93cb8ec0360950))
+
 ## [0.4.0](https://github.com/cares0/claudesync/compare/claude-settings-sync-v0.3.0...claude-settings-sync-v0.4.0) (2026-04-04)
 
 
