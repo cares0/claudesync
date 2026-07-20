@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/cares0/claudesync/compare/claude-settings-sync-v1.0.0...claude-settings-sync-v1.0.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* normalize package.json bin path and repository url ([042cfe8](https://github.com/cares0/claudesync/commit/042cfe85e29620b9ade3775a45edf8f32adfb839))
+
 ## [1.0.0](https://github.com/cares0/claudesync/compare/claude-settings-sync-v0.5.0...claude-settings-sync-v1.0.0) (2026-07-20)
 
 
