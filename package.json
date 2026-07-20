@@ -4,7 +4,7 @@
   "description": "Sync Claude Code settings across machines via GitHub Gist",
   "type": "module",
   "bin": {
-    "claudesync": "./bin/claudesync.js"
+    "claudesync": "bin/claudesync.js"
   },
   "scripts": {
     "build": "tsup",
@@ -32,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cares0/claudesync.git"
+    "url": "git+https://github.com/cares0/claudesync.git"
   },
   "homepage": "https://github.com/cares0/claudesync",
   "devDependencies": {
