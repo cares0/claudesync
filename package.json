@@ -1,6 +1,6 @@
 {
   "name": "claude-settings-sync",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Sync Claude Code settings across machines via GitHub Gist",
   "type": "module",
   "bin": {
