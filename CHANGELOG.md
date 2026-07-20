@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/cares0/claudesync/compare/claude-settings-sync-v0.5.0...claude-settings-sync-v1.0.0) (2026-07-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* the `plugins` and `teams` categories are removed and `agents`, `rules`, `commands` are added. `--only plugins|teams` no longer works. Legacy files in existing gists are ignored on pull and deleted from the gist on the next push. Plugin state now travels via settings.json (enabledPlugins / extraKnownMarketplaces).
+
+### Features
+
+* update sync targets for current Claude Code ([1510e62](https://github.com/cares0/claudesync/commit/1510e62ecf561620d621bc667f803a6fb1b09d90))
+
 ## [0.5.0](https://github.com/cares0/claudesync/compare/claude-settings-sync-v0.4.1...claude-settings-sync-v0.5.0) (2026-04-06)
 
 
