@@ -321,8 +321,8 @@ const messages = {
     en: 'Record message on push (shown in history)',
   },
   'help.opt_only': {
-    ko: '카테고리 필터 (settings|instructions|hooks|skills|plugins|teams|ui)',
-    en: 'Category filter (settings|instructions|hooks|skills|plugins|teams|ui)',
+    ko: '카테고리 필터 (settings|instructions|agents|rules|commands|hooks|skills|ui)',
+    en: 'Category filter (settings|instructions|agents|rules|commands|hooks|skills|ui)',
   },
   'help.opt_force': {
     ko: '확인 없이 실행',

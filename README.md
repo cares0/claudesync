@@ -81,12 +81,13 @@ $ claudesync push -m "initial sync"
 
 | Category | Files |
 |----------|-------|
-| **settings** | `settings.json`, `keybindings.json`, `policy-limits.json`, `remote-settings.json` |
+| **settings** | `settings.json`, `keybindings.json` |
 | **instructions** | `CLAUDE.md` |
+| **agents** | `agents/` directory |
+| **rules** | `rules/` directory |
+| **commands** | `commands/` directory |
 | **hooks** | `hooks/` directory |
 | **skills** | `skills/` directory |
-| **plugins** | `plugins/installed_plugins.json`, `known_marketplaces.json`, `blocklist.json` |
-| **teams** | `teams/` directory |
 | **ui** | `statusline-command.sh` |
 
 Conversation logs, sessions, caches, and `~/.claude.json` are **never** synced.
@@ -156,7 +157,7 @@ claudesync config passphrase <val> # Set encryption passphrase
 | Flag | Description |
 |------|-------------|
 | `-m, --message <msg>` | Sync message (shown in `history`) |
-| `--only <category>` | Filter: `settings` / `instructions` / `hooks` / `skills` / `plugins` / `teams` / `ui` |
+| `--only <category>` | Filter: `settings` / `instructions` / `agents` / `rules` / `commands` / `hooks` / `skills` / `ui` |
 | `--force` | Skip confirmation prompts |
 | `--encrypt` | AES-256-GCM encrypt files before upload |
 | `--lang ko\|en` | Set display language |
@@ -168,6 +169,8 @@ claudesync config passphrase <val> # Set encryption passphrase
 Settings are stored as files in a single **private GitHub Gist**. Each file maps 1:1 to a Gist file, with directory separators URL-encoded as `%2F` (e.g. `hooks/pre-tool-use.sh` becomes `hooks%2Fpre-tool-use.sh`).
 
 A `_meta.json` file in the Gist tracks file mappings, categories, encryption status, sync timestamps, machine info, and push messages. Gist's built-in revision history powers `history` and `rollback`.
+
+Legacy files from older versions of claudesync (e.g. `plugins/`, `teams/`) are ignored on pull and removed from the Gist on the next push.
 
 ## Security
 

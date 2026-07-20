@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import type { AutoConfig, PullConflictPolicy, AutoDirection } from '../src/types.js';
 import { saveAutoConfig, loadAutoConfig, removeAutoConfig } from '../src/core/auto-config.js';
 import { autoConfigPath } from '../src/utils/paths.js';
-import { unlinkSync, existsSync } from 'node:fs';
+import { unlinkSync, existsSync, writeFileSync } from 'node:fs';
 
 describe('AutoConfig types', () => {
   it('AutoConfig has correct shape', () => {
@@ -61,6 +61,24 @@ describe('auto-config persistence', () => {
   it('loadAutoConfig returns null when no file', () => {
     const loaded = loadAutoConfig();
     expect(loaded).toBeNull();
+  });
+
+  it('loadAutoConfig filters out categories no longer supported (e.g. legacy plugins/teams)', () => {
+    const path = autoConfigPath();
+    writeFileSync(
+      path,
+      JSON.stringify({
+        direction: 'push',
+        interval_seconds: 300,
+        categories: ['settings', 'plugins', 'teams', 'hooks'],
+        encrypt: false,
+        enabled: true,
+        created_at: '2026-04-04T00:00:00.000Z',
+      }),
+      'utf-8',
+    );
+    const loaded = loadAutoConfig();
+    expect(loaded?.categories).toEqual(['settings', 'hooks']);
   });
 
   it('removeAutoConfig deletes the file', () => {

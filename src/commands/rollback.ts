@@ -4,7 +4,7 @@ import { t } from '../utils/i18n.js';
 import { info, success, warn, error, heading, confirm, c, printDiff, askHidden } from '../utils/terminal.js';
 import { loadConfig, saveConfig } from '../core/auth.js';
 import { getGistAtRevision, parseMeta, getHistory } from '../core/gist.js';
-import { scanFiles } from '../core/scanner.js';
+import { scanFiles, findTargetCategory } from '../core/scanner.js';
 import { simpleDiff } from '../core/conflict.js';
 import { decrypt, isEncrypted } from '../core/crypto.js';
 import { claudeDir, isPathSafe, fromGistFilename } from '../utils/paths.js';
@@ -49,6 +49,8 @@ export async function runRollback(version: string): Promise<void> {
 
     const entry = meta?.file_map[gistName];
     const relativePath = entry?.path ?? fromGistFilename(gistName);
+    // Skip legacy files that no longer map to a current sync target
+    if (!findTargetCategory(relativePath)) continue;
     const local = localMap.get(relativePath);
 
     if (!local) {

@@ -13,20 +13,18 @@ const SYNC_TARGETS: SyncTarget[] = [
   // settings
   { path: 'settings.json', category: 'settings' },
   { path: 'keybindings.json', category: 'settings' },
-  { path: 'policy-limits.json', category: 'settings' },
-  { path: 'remote-settings.json', category: 'settings' },
   // instructions
   { path: 'CLAUDE.md', category: 'instructions' },
+  // agents
+  { path: 'agents', category: 'agents', isDir: true },
+  // rules
+  { path: 'rules', category: 'rules', isDir: true },
+  // commands
+  { path: 'commands', category: 'commands', isDir: true },
   // hooks
   { path: 'hooks', category: 'hooks', isDir: true },
   // skills
   { path: 'skills', category: 'skills', isDir: true },
-  // plugins
-  { path: 'plugins/installed_plugins.json', category: 'plugins' },
-  { path: 'plugins/known_marketplaces.json', category: 'plugins' },
-  { path: 'plugins/blocklist.json', category: 'plugins' },
-  // teams
-  { path: 'teams', category: 'teams', isDir: true },
   // ui
   { path: 'statusline-command.sh', category: 'ui' },
 ];
@@ -109,4 +107,18 @@ export function scanFiles(filterCategory?: Category): ScannedFile[] {
 /** List all sync targets for display */
 export function listTargets(): SyncTarget[] {
   return [...SYNC_TARGETS];
+}
+
+/** Find the category a relative path belongs to under current sync targets, or undefined */
+export function findTargetCategory(relativePath: string): Category | undefined {
+  for (const target of SYNC_TARGETS) {
+    if (target.isDir) {
+      if (relativePath === target.path || relativePath.startsWith(`${target.path}/`)) {
+        return target.category;
+      }
+    } else if (relativePath === target.path) {
+      return target.category;
+    }
+  }
+  return undefined;
 }

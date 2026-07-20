@@ -2,10 +2,11 @@
 export const CATEGORIES = [
   'settings',
   'instructions',
+  'agents',
+  'rules',
+  'commands',
   'hooks',
   'skills',
-  'plugins',
-  'teams',
   'ui',
 ] as const;
 

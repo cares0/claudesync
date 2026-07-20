@@ -81,12 +81,13 @@ $ claudesync push -m "첫 동기화"
 
 | 카테고리 | 파일 |
 |----------|------|
-| **settings** | `settings.json`, `keybindings.json`, `policy-limits.json`, `remote-settings.json` |
+| **settings** | `settings.json`, `keybindings.json` |
 | **instructions** | `CLAUDE.md` |
+| **agents** | `agents/` 디렉토리 |
+| **rules** | `rules/` 디렉토리 |
+| **commands** | `commands/` 디렉토리 |
 | **hooks** | `hooks/` 디렉토리 |
 | **skills** | `skills/` 디렉토리 |
-| **plugins** | `plugins/installed_plugins.json`, `known_marketplaces.json`, `blocklist.json` |
-| **teams** | `teams/` 디렉토리 |
 | **ui** | `statusline-command.sh` |
 
 대화 로그, 세션, 캐시, `~/.claude.json` 등은 동기화하지 **않습니다**.
@@ -156,7 +157,7 @@ claudesync config passphrase <val> # 암호화 비밀번호 설정
 | 플래그 | 설명 |
 |--------|------|
 | `-m, --message <msg>` | 동기화 메시지 (`history`에서 확인 가능) |
-| `--only <category>` | 필터: `settings` / `instructions` / `hooks` / `skills` / `plugins` / `teams` / `ui` |
+| `--only <category>` | 필터: `settings` / `instructions` / `agents` / `rules` / `commands` / `hooks` / `skills` / `ui` |
 | `--force` | 확인 프롬프트 건너뛰기 |
 | `--encrypt` | AES-256-GCM으로 암호화 후 업로드 |
 | `--lang ko\|en` | 출력 언어 변경 |
@@ -168,6 +169,8 @@ claudesync config passphrase <val> # 암호화 비밀번호 설정
 설정 파일은 하나의 **비공개 GitHub Gist**에 저장됩니다. 각 파일이 Gist 파일에 1:1로 매핑되며, 디렉토리 구분자는 `%2F`로 URL 인코딩됩니다 (예: `hooks/pre-tool-use.sh` → `hooks%2Fpre-tool-use.sh`).
 
 Gist 안의 `_meta.json`에 파일 매핑, 카테고리, 암호화 여부, 동기화 시각, 머신 정보, push 메시지가 기록됩니다. Gist의 내장 리비전 히스토리가 `history`와 `rollback`을 지원합니다.
+
+이전 버전 claudesync가 남긴 레거시 파일(예: `plugins/`, `teams/`)은 pull 시 무시되며, 다음 push 때 Gist에서 제거됩니다.
 
 ## 보안
 

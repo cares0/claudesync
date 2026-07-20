@@ -2,6 +2,7 @@ import { diffLines } from 'diff';
 import type { FileChange, Category, ScannedFile, Gist } from '../types.js';
 import { fromGistFilename } from '../utils/paths.js';
 import { parseMeta } from './gist.js';
+import { findTargetCategory } from './scanner.js';
 
 const META_FILE = '_meta.json';
 
@@ -86,7 +87,10 @@ export function compareForPull(
 
     const entry = meta?.file_map[gistName];
     const relativePath = entry?.path ?? fromGistFilename(gistName);
-    const category = (entry?.category ?? 'settings') as Category;
+
+    // Skip legacy files that no longer map to a current sync target
+    const category = findTargetCategory(relativePath);
+    if (!category) continue;
 
     const local = localMap.get(relativePath);
 

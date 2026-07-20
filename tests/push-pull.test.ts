@@ -130,6 +130,18 @@ describe('compareForPush', () => {
     expect(hook!.status).toBe('unchanged');
   });
 
+  it('still reports a legacy remote-only file as deleted (cleans up on next push)', () => {
+    const local: ScannedFile[] = [makeLocal('settings.json', 'current content')];
+    const gist = makeGist({
+      'teams%2Fsession-abc%2Ffoo.json': 'legacy team data',
+      'settings.json': 'current content',
+    });
+    const changes = compareForPush(local, gist);
+    const legacy = changes.find((c) => c.relativePath === 'teams/session-abc/foo.json');
+    expect(legacy).toBeDefined();
+    expect(legacy!.status).toBe('deleted');
+  });
+
   it('detects modification across encoding migration (legacy remote, new local)', () => {
     const meta: SyncMeta = {
       version: 1,
@@ -162,7 +174,7 @@ describe('compareForPush', () => {
 
 describe('compareForPull', () => {
   it('detects remotely added files (not present locally)', () => {
-    const gist = makeGist({ 'new-file.json': 'remote content' });
+    const gist = makeGist({ 'settings.json': 'remote content' });
     const local: ScannedFile[] = [];
     const changes = compareForPull(gist, local);
     expect(changes).toHaveLength(1);
@@ -221,6 +233,17 @@ describe('compareForPull', () => {
     expect(changes).toHaveLength(1);
     expect(changes[0].status).toBe('unchanged');
     expect(changes[0].relativePath).toBe('hooks/init.sh');
+  });
+
+  it('skips legacy gist files that no longer map to a current sync target', () => {
+    const gist = makeGist({
+      'teams%2Fsession-abc%2Ffoo.json': 'legacy team data',
+      'settings.json': 'current content',
+    });
+    const local = [makeLocal('settings.json', 'current content')];
+    const changes = compareForPull(gist, local);
+    expect(changes).toHaveLength(1);
+    expect(changes[0].relativePath).toBe('settings.json');
   });
 });
 

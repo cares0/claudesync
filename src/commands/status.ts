@@ -2,7 +2,8 @@ import { t } from '../utils/i18n.js';
 import { c, heading } from '../utils/terminal.js';
 import { loadConfig } from '../core/auth.js';
 import { getGist, parseMeta } from '../core/gist.js';
-import { machineName, platformString } from '../utils/paths.js';
+import { machineName, platformString, fromGistFilename } from '../utils/paths.js';
+import { findTargetCategory } from '../core/scanner.js';
 
 export async function runStatus(): Promise<void> {
   const config = loadConfig();
@@ -34,7 +35,11 @@ export async function runStatus(): Promise<void> {
         console.log(`    ${t('status.file_count')}: ${meta.last_sync.file_count}`);
       }
 
-      const fileCount = Object.keys(gist.files).filter((n) => n !== '_meta.json').length;
+      const fileCount = Object.keys(gist.files).filter((n) => {
+        if (n === '_meta.json') return false;
+        const relativePath = meta?.file_map[n]?.path ?? fromGistFilename(n);
+        return findTargetCategory(relativePath) !== undefined;
+      }).length;
       console.log(`  ${t('status.remote_files').replace('{count}', String(fileCount))}`);
     } catch {
       console.log(`  ${c.yellow(t('status.gist_fetch_failed'))}`);
